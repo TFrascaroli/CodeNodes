@@ -1,0 +1,53 @@
+<html style="width:100%; height:100%;">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="codenodes.css">
+    <script type="text/javascript" src="codenodes.js"></script>
+</head>
+
+<body style="width:100%; height:100%; margin:0px;">
+
+    <script>
+        var cn2 = new codenodes({
+            first: {
+                builder: function() {
+                    console.log("Received parameters... ", arguments);
+                },
+                schema: [{
+                    onBuild: false,
+                    name: "primer valor",
+                    type: "text",
+                    mode: "edit"
+                }, {
+                    onBuild: false,
+                    name: "segundo valor",
+                    type: "range",
+                    mode: "edit"
+                }, {
+                    onBuild: false,
+                    name: "tercer valor",
+                    type: "number",
+                    mode: "edit"
+                }, {
+                    onBuild: false,
+                    name: "cuarto valor",
+                    type: "number",
+                    mode: "in"
+                }, {
+                    onBuild: false,
+                    name: "solo en este",
+                    type: "first",
+                    mode: "in"
+                }]
+            }
+        });
+        cn2.addNode("Node 1", "first");
+        cn2.addNode("Node 2", "first");
+        cn2.addNode("Node 3", "first");
+        cn2.addNode("Node 4", "first");
+        document.body.appendChild(cn2.getSVG());
+        cn2.init();
+    </script>
+</body>
+
+</html>
