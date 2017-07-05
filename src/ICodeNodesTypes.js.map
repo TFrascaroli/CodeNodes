@@ -1,0 +1,1 @@
+{"version":3,"sources":["ICodeNodesTypes.ts"],"names":[],"mappings":";;AAOC,CAAC","file":"ICodeNodesTypes.js","sourcesContent":["import {ICodeNodesValueSchema as schema} from \"./ICodeNodesValueSchema\";\r\n\r\nexport interface ICodeNodesTypes {\r\n    builder: Function;\r\n    clone: Function;\r\n    clonable: boolean;\r\n    schema: Array<schema>;\r\n};"]}
