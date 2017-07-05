@@ -4,13 +4,15 @@ var nodevalue_1 = require("./nodevalue");
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
-    function Node(title, builder, schema, type, clonable, clonefn, x, y) {
+    function Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
         var self = this;
         this.title = title;
         this.type = type;
         this.values = {};
         this.clonefn = clonefn;
         this.clonable = clonable;
+        this.multiple = multiple;
+        this.outputType = outputType;
         this.builder = builder;
         this.position = {
             x: x,
@@ -21,7 +23,11 @@ var Node = (function () {
         this.onmousedown = null;
         this.outputConnectors = [];
         this.schema.forEach(function (prop) {
-            self.values[prop.name] = new nodevalue_1.NodeValue(prop.name, prop.type, prop.mode, self, prop.options);
+            var name = prop.name;
+            if (self.multiple) {
+                name += " 0";
+            }
+            self.values[name] = new nodevalue_1.NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
         });
     }
     ;
@@ -31,8 +37,12 @@ var Node = (function () {
             this.g = document.createElementNS(namespace, "g");
             this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
             this.g.setAttribute("class", "entity");
+            this.outputOffset = {
+                x: 130,
+                y: (this.nRows * ROW_HEIGHT) - 10
+            };
             this.rect = document.createElementNS(namespace, "rect");
-            this.rect.setAttribute("width", "110");
+            this.rect.setAttribute("width", this.outputOffset.x.toString());
             this.rect.setAttribute("rx", "3");
             this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
             this.rect.setAttribute("class", "draggable");
@@ -51,10 +61,6 @@ var Node = (function () {
             this.g.appendChild(t);
             var output = document.createElementNS(namespace, "circle");
             this.output = output;
-            this.outputOffset = {
-                x: 110,
-                y: (this.nRows * ROW_HEIGHT) - 10
-            };
             output.setAttribute("cx", (this.outputOffset.x).toString());
             output.setAttribute("cy", (this.outputOffset.y).toString());
             output.setAttribute("r", "6");
@@ -66,15 +72,21 @@ var Node = (function () {
             }.bind(this);
             output.addEventListener("mousedown", this.outputDownHandler);
             var outputType = document.createElementNS(namespace, "text");
-            outputType.textContent = "[" + this.type + "]";
+            this.outputText = outputType;
+            if (this.multiple) {
+                outputType.textContent = "[" + this.outputType + "]";
+            }
+            else {
+                outputType.textContent = this.outputType;
+            }
             outputType.classList.add("output-type");
-            outputType.setAttribute("x", (100).toString());
+            outputType.setAttribute("x", (this.outputOffset.x - 10).toString());
             outputType.setAttribute("y", (this.outputOffset.y).toString());
             this.g.appendChild(output);
             this.g.appendChild(outputType);
             this.closeBtn = document.createElementNS(namespace, "circle");
             this.closeBtn.classList.add("close-btn");
-            this.closeBtn.setAttribute("cx", "100");
+            this.closeBtn.setAttribute("cx", (this.outputOffset.x - 10).toString());
             this.closeBtn.setAttribute("r", "6");
             this.closeBtn.setAttribute("cy", "15");
             this.close = function () {
@@ -91,6 +103,28 @@ var Node = (function () {
                 val.render(self.g, i++);
             }
         });
+    };
+    ;
+    Node.prototype.cloneLastValue = function () {
+        var self = this;
+        if (this.multiple) {
+            var full = Object.keys(self.values).every(function (k) {
+                var val = self.values[k];
+                return !self.values.hasOwnProperty(k) || val.inputConnector !== null;
+            });
+            if (full) {
+                var prop = JSON.parse(JSON.stringify(this.schema[this.schema.length - 1])), name_1 = prop.name + " " + this.schema.length;
+                this.schema.push(prop);
+                this.nRows++;
+                self.values[name_1] = new nodevalue_1.NodeValue(name_1, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
+                self.values[name_1].render(self.g, this.schema.length);
+                this.outputOffset.y = (this.nRows * ROW_HEIGHT) - 10;
+                this.output.setAttribute("cx", (this.outputOffset.x).toString());
+                this.output.setAttribute("cy", (this.outputOffset.y).toString());
+                this.outputText.setAttribute("y", (this.outputOffset.y).toString());
+                this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
+            }
+        }
     };
     ;
     Node.prototype.move = function (x, y) {

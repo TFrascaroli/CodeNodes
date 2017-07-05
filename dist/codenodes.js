@@ -580,13 +580,13 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
@@ -594,35 +594,35 @@ SvgPanZoom.prototype.setupHandlers = function() {
 
     // Mouse up group
   , mouseup: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchend: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
   , touchmove: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchleave: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchcancel: function(evt) {
-	if (evt.target instanceof HTMLInputElement || evt.target instanceof HTMLSelectElement || evt.target instanceof HTMLButtonElement)  return;
+		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   }
@@ -1893,11 +1893,22 @@ function requestTimeout(timeout) {
 
 },{}],8:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var nodecanvas_1 = require("./nodecanvas");
+var menu_1 = require("./menu");
 var CodeNodes = (function () {
     function CodeNodes(types) {
+        var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
         this.types = types;
+        this.menu = new menu_1.CodeNodesMenu(this);
+        this.canvas.ondblclick = function (p, rawP) {
+            self.menuPoint = p;
+            self.menu.open(rawP.x + 20, rawP.y - 70);
+        };
+        this.canvas.onclick = function () {
+            self.menu.close();
+        };
     }
     ;
     CodeNodes.prototype.getSVG = function () {
@@ -1907,40 +1918,226 @@ var CodeNodes = (function () {
     ;
     CodeNodes.prototype.init = function () {
         this.canvas.init();
+        this.canvas.svg.appendChild(this.menu.g);
     };
     ;
+    CodeNodes.prototype.center = function () {
+        this.canvas.center();
+    };
     CodeNodes.prototype.addNode = function (name, type) {
         var t = this.types[type];
         if (t) {
-            this.canvas.addNode(name, t.builder, t.schema, type, t.clonable || false, t.clone, 10, 10);
+            var outputType = t.outputType || type;
+            var ot = this.types[outputType];
+            if (ot) {
+                var p = this.menuPoint || { x: 10, y: 10 };
+                this.canvas.addNode(name, t.builder, t.schema, type, t.clonable || false, t.clone, false, outputType, p.x, p.y);
+            }
+            else {
+                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+            }
         }
         else {
             console.log("There is no type " + type + " registered");
         }
     };
     ;
+    CodeNodes.prototype.collectionBuilder = function () {
+        function flatten(arr) {
+            return arr.reduce(function (flat, toFlatten) {
+                return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+            }, []);
+        }
+        return flatten(arguments).filter(function (v) {
+            return typeof v !== "undefined";
+        });
+    };
+    ;
+    CodeNodes.prototype.collectionClone = function (arr) {
+        return arr;
+        // return arr.map(function (e) {
+        //     return e.clone()
+        // }); TODO: Arreglar això
+    };
+    ;
+    CodeNodes.prototype.addCollection = function (name, ofType) {
+        var t = this.types[ofType];
+        if (t) {
+            var outputType = t.outputType || ofType;
+            var ot = this.types[outputType];
+            if (ot) {
+                var collectionSchema = [
+                    {
+                        onBuild: true,
+                        name: " - " + ofType,
+                        type: ofType,
+                        mode: "in",
+                        options: null,
+                        multiple: false
+                    }
+                ];
+                var p = this.menuPoint || { x: 10, y: 10 };
+                this.canvas.addNode(name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y);
+            }
+            else {
+                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+            }
+        }
+        else {
+            console.log("There is no type " + ofType + " registered");
+        }
+    };
+    ;
     return CodeNodes;
 }());
-module.exports = {
-    Interface: CodeNodes
-};
+exports.CodeNodes = CodeNodes;
 
 
 
-},{"./nodecanvas":10}],9:[function(require,module,exports){
+},{"./menu":9,"./nodecanvas":11}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var namespace = "http://www.w3.org/2000/svg";
+var CodeNodesMenu = (function () {
+    function CodeNodesMenu(main) {
+        var self = this;
+        var addMode = null;
+        this.main = main;
+        this.g = document.createElementNS(namespace, "g");
+        this.g.classList.add("menu-g");
+        var popup = document.createElement("div");
+        popup.classList.add("codenodes-menu-popup");
+        this.popup = popup;
+        var popupLayer = document.createElement("div");
+        popupLayer.classList.add("layer");
+        var popupContent = document.createElement("div");
+        popupContent.classList.add("content");
+        var popupWraper = document.createElement("div");
+        popupWraper.classList.add("wraper");
+        var popupTitle = document.createElement("div");
+        popupTitle.classList.add("title");
+        var entitySelector = document.createElement("select");
+        var entitySelectorWrap = document.createElement("div");
+        entitySelectorWrap.classList.add("entity-selector");
+        var entityName = document.createElement("input");
+        var entityNameWrap = document.createElement("div");
+        entitySelectorWrap.classList.add("entity-name");
+        var popupOK = document.createElement("div");
+        popupOK.classList.add("ok");
+        popup.appendChild(popupLayer);
+        popup.appendChild(popupWraper);
+        popupWraper.appendChild(popupContent);
+        entityNameWrap.appendChild(entityName);
+        popupContent.appendChild(entityNameWrap);
+        entitySelectorWrap.appendChild(entitySelector);
+        popupContent.appendChild(entitySelectorWrap);
+        popupContent.appendChild(popupOK);
+        document.body.appendChild(popup);
+        popupOK.addEventListener("click", function () {
+            self.close();
+            switch (addMode) {
+                case "node":
+                    main.addNode(entityName.value, entitySelector.value);
+                    break;
+                case "collection":
+                    main.addCollection(entityName.value, entitySelector.value);
+                    break;
+            }
+        });
+        function fillEntitySelector() {
+            entitySelector.innerHTML = "";
+            entitySelector.value = "";
+            var types = Object.keys(self.main.types).filter(function (p) { return self.main.types.hasOwnProperty(p); });
+            types.forEach(function (t) {
+                var opt = document.createElement("option");
+                opt.textContent = t;
+                opt.value = t;
+                entitySelector.appendChild(opt);
+            });
+        }
+        var _loop_1 = function (i) {
+            var rect = document.createElementNS(namespace, "rect"), t = document.createElementNS(namespace, "text");
+            rect.classList.add("menu-rect");
+            t.classList.add("menu-t");
+            rect.setAttribute("x", (5).toString());
+            rect.setAttribute("y", (35 * i).toString());
+            t.setAttribute("x", (10).toString());
+            t.setAttribute("y", ((35 * i) + 19).toString());
+            self.g.appendChild(rect);
+            self.g.appendChild(t);
+            switch (i) {
+                case 0:
+                    t.textContent = "Add node";
+                    rect.addEventListener("click", function (evt) {
+                        popupTitle.textContent = t.textContent;
+                        entityName.value = "New node";
+                        entityName.focus();
+                        fillEntitySelector();
+                        addMode = "node";
+                        popup.classList.add("visible");
+                        evt.stopPropagation();
+                    });
+                    break;
+                case 1:
+                    t.textContent = "Add collection";
+                    rect.addEventListener("click", function (evt) {
+                        popupTitle.textContent = t.textContent;
+                        entityName.value = "New collection";
+                        entityName.focus();
+                        fillEntitySelector();
+                        addMode = "collection";
+                        popup.classList.add("visible");
+                        evt.stopPropagation();
+                    });
+                    break;
+                case 2:
+                    t.textContent = "Center";
+                    rect.addEventListener("click", function (evt) {
+                        main.center();
+                        self.close();
+                        evt.stopPropagation();
+                    });
+                    break;
+                case 3:
+                    t.textContent = "Reset";
+                    break;
+            }
+        };
+        for (var i = 0; i < 4; i++) {
+            _loop_1(i);
+        }
+    }
+    CodeNodesMenu.prototype.open = function (x, y) {
+        this.g.classList.add("visible");
+        this.g.setAttribute("transform", "translate(" + x.toString() + "," + y.toString() + ")");
+        this.g.classList.add("visible");
+    };
+    CodeNodesMenu.prototype.close = function () {
+        this.popup.classList.remove("visible");
+        this.g.classList.remove("visible");
+    };
+    return CodeNodesMenu;
+}());
+exports.CodeNodesMenu = CodeNodesMenu;
+
+
+
+},{}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var nodevalue_1 = require("./nodevalue");
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
-    function Node(title, builder, schema, type, clonable, clonefn, x, y) {
+    function Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
         var self = this;
         this.title = title;
         this.type = type;
         this.values = {};
         this.clonefn = clonefn;
         this.clonable = clonable;
+        this.multiple = multiple;
+        this.outputType = outputType;
         this.builder = builder;
         this.position = {
             x: x,
@@ -1951,7 +2148,11 @@ var Node = (function () {
         this.onmousedown = null;
         this.outputConnectors = [];
         this.schema.forEach(function (prop) {
-            self.values[prop.name] = new nodevalue_1.NodeValue(prop.name, prop.type, prop.mode, self, prop.options);
+            var name = prop.name;
+            if (self.multiple) {
+                name += " 0";
+            }
+            self.values[name] = new nodevalue_1.NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
         });
     }
     ;
@@ -1961,8 +2162,12 @@ var Node = (function () {
             this.g = document.createElementNS(namespace, "g");
             this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
             this.g.setAttribute("class", "entity");
+            this.outputOffset = {
+                x: 130,
+                y: (this.nRows * ROW_HEIGHT) - 10
+            };
             this.rect = document.createElementNS(namespace, "rect");
-            this.rect.setAttribute("width", "110");
+            this.rect.setAttribute("width", this.outputOffset.x.toString());
             this.rect.setAttribute("rx", "3");
             this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
             this.rect.setAttribute("class", "draggable");
@@ -1981,10 +2186,6 @@ var Node = (function () {
             this.g.appendChild(t);
             var output = document.createElementNS(namespace, "circle");
             this.output = output;
-            this.outputOffset = {
-                x: 110,
-                y: (this.nRows * ROW_HEIGHT) - 10
-            };
             output.setAttribute("cx", (this.outputOffset.x).toString());
             output.setAttribute("cy", (this.outputOffset.y).toString());
             output.setAttribute("r", "6");
@@ -1996,15 +2197,21 @@ var Node = (function () {
             }.bind(this);
             output.addEventListener("mousedown", this.outputDownHandler);
             var outputType = document.createElementNS(namespace, "text");
-            outputType.textContent = "[" + this.type + "]";
+            this.outputText = outputType;
+            if (this.multiple) {
+                outputType.textContent = "[" + this.outputType + "]";
+            }
+            else {
+                outputType.textContent = this.outputType;
+            }
             outputType.classList.add("output-type");
-            outputType.setAttribute("x", (100).toString());
+            outputType.setAttribute("x", (this.outputOffset.x - 10).toString());
             outputType.setAttribute("y", (this.outputOffset.y).toString());
             this.g.appendChild(output);
             this.g.appendChild(outputType);
             this.closeBtn = document.createElementNS(namespace, "circle");
             this.closeBtn.classList.add("close-btn");
-            this.closeBtn.setAttribute("cx", "100");
+            this.closeBtn.setAttribute("cx", (this.outputOffset.x - 10).toString());
             this.closeBtn.setAttribute("r", "6");
             this.closeBtn.setAttribute("cy", "15");
             this.close = function () {
@@ -2021,6 +2228,28 @@ var Node = (function () {
                 val.render(self.g, i++);
             }
         });
+    };
+    ;
+    Node.prototype.cloneLastValue = function () {
+        var self = this;
+        if (this.multiple) {
+            var full = Object.keys(self.values).every(function (k) {
+                var val = self.values[k];
+                return !self.values.hasOwnProperty(k) || val.inputConnector !== null;
+            });
+            if (full) {
+                var prop = JSON.parse(JSON.stringify(this.schema[this.schema.length - 1])), name_1 = prop.name + " " + this.schema.length;
+                this.schema.push(prop);
+                this.nRows++;
+                self.values[name_1] = new nodevalue_1.NodeValue(name_1, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
+                self.values[name_1].render(self.g, this.schema.length);
+                this.outputOffset.y = (this.nRows * ROW_HEIGHT) - 10;
+                this.output.setAttribute("cx", (this.outputOffset.x).toString());
+                this.output.setAttribute("cy", (this.outputOffset.y).toString());
+                this.outputText.setAttribute("y", (this.outputOffset.y).toString());
+                this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
+            }
+        }
     };
     ;
     Node.prototype.move = function (x, y) {
@@ -2095,7 +2324,7 @@ exports.Node = Node;
 
 
 
-},{"./nodevalue":12}],10:[function(require,module,exports){
+},{"./nodevalue":13}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var svgPanZoom = require("svg-pan-zoom");
@@ -2113,6 +2342,9 @@ var NodeCanvas = (function () {
         this.currentConnector = null;
         this.diff = null;
     }
+    NodeCanvas.prototype.center = function () {
+        this.zoomingSvg.reset();
+    };
     NodeCanvas.prototype.cursorPoint = function (evt) {
         this.pt.x = evt.clientX;
         this.pt.y = evt.clientY;
@@ -2135,27 +2367,36 @@ var NodeCanvas = (function () {
             this.g.setAttribute("transform", "matrix(1,1,1,1,0,0)");
             this.g.appendChild(this.paths);
             this.svg.appendChild(this.g);
+            this.svg.addEventListener("dblclick", function (evt) {
+                if (!(evt.target instanceof SVGSVGElement))
+                    return;
+                var p = self.cursorPoint(evt);
+                self.ctm = self.g.getCTM().inverse();
+                self.offset = self.svg.getBoundingClientRect();
+                self.ondblclick(self.convertCoords(p), p);
+            });
+            this.svg.addEventListener("click", function (evt) {
+                self.onclick();
+            });
         }
-        this.nodes.forEach(function (node) {
-            node.render(self.g);
-        });
+        ;
     };
     ;
-    NodeCanvas.prototype.addNode = function (title, builder, schema, type, clonable, clonefn, x, y) {
-        var n = new node_1.Node(title, builder, schema, type, clonable, clonefn, x, y), self = this, ctm = null, offset = null;
-        function convertCoords(o) {
-            var x = o.x, y = o.y;
-            return {
-                x: (ctm.a * x) + (ctm.c * y) + ctm.e - offset.left,
-                y: (ctm.b * x) + (ctm.d * y) + ctm.f - offset.top
-            };
-        }
+    NodeCanvas.prototype.convertCoords = function (o) {
+        var x = o.x, y = o.y;
+        return {
+            x: (this.ctm.a * x) + (this.ctm.c * y) + this.ctm.e,
+            y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
+        };
+    };
+    NodeCanvas.prototype.addNode = function (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
+        var n = new node_1.Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y), self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
                 var p = self.cursorPoint(evt);
                 p.x = p.x - self.diff.x;
                 p.y = p.y - self.diff.y;
-                var p1 = convertCoords(p);
+                var p1 = self.convertCoords(p);
                 self.draggingEntity.move(p1.x, p1.y);
             }
         }
@@ -2166,14 +2407,15 @@ var NodeCanvas = (function () {
             self.draggingEntity = null;
         }
         function mouseMoveConnectorHandler(evt) {
-            var p = convertCoords(self.cursorPoint(evt));
+            var p = self.convertCoords(self.cursorPoint(evt));
             self.currentConnector.moveEndPoint(p);
         }
         function mouseUpConnectorHandler(evt) {
-            var p = convertCoords(self.cursorPoint(evt));
+            var p = self.convertCoords(self.cursorPoint(evt));
             self.svg.removeEventListener("mousemove", mouseMoveConnectorHandler);
             self.svg.removeEventListener("mouseup", mouseUpConnectorHandler);
             var dots = [].slice.call(document.querySelectorAll(".codenodes .dot"));
+            var cc = self.currentConnector;
             var candidates = dots.map(function (dot) {
                 var pos = dot.parentValue.getDotPosition();
                 var dist = Math.sqrt(Math.pow(p.x - pos.x, 2) + Math.pow(p.y - pos.y, 2));
@@ -2187,29 +2429,33 @@ var NodeCanvas = (function () {
                 return a.dist - b.dist;
             });
             if (candidates.length > 0) {
-                if (candidates[0].dot.parentValue.inputConnector) {
-                    candidates[0].dot.parentValue.inputConnector.remove();
+                var candidateDot = candidates[0].dot;
+                if (candidateDot.parentValue.inputConnector) {
+                    candidateDot.parentValue.inputConnector.remove();
                 }
-                candidates[0].dot.parentValue.inputConnector = self.currentConnector;
-                self.currentConnector.end2 = candidates[0].dot.parentValue;
-                if (self.currentConnector.end2.type !== "any" && (self.currentConnector.end2.type !== self.currentConnector.end1.type)) {
-                    self.currentConnector.remove();
+                candidateDot.parentValue.inputConnector = cc;
+                cc.end2 = candidateDot.parentValue;
+                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
+                    cc.remove();
                 }
-                if (self.currentConnector.end1 === candidates[0].dot.parentValue.parentNode) {
-                    self.currentConnector.remove();
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
                 }
-                candidates[0].dot.parentValue.updateConectorPosition();
+                if (cc.end2.parentNode.multiple) {
+                    cc.end2.parentNode.cloneLastValue();
+                }
+                candidateDot.parentValue.updateConectorPosition();
             }
             else {
-                self.currentConnector.remove();
+                cc.remove();
             }
             self.currentConnector = null;
         }
         this.nodes.push(n);
         n.outputMousedown = function (evt, entity) {
             var p = self.cursorPoint(evt);
-            ctm = self.g.getCTM().inverse();
-            offset = self.svg.getBoundingClientRect();
+            self.ctm = self.g.getCTM().inverse();
+            self.offset = self.svg.getBoundingClientRect();
             var p1 = {
                 x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
                 y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
@@ -2223,14 +2469,14 @@ var NodeCanvas = (function () {
         };
         n.onmousedown = function (evt, entity) {
             var p = self.cursorPoint(evt);
-            ctm = self.g.getCTM();
-            offset = self.svg.getBoundingClientRect();
-            var entPos = convertCoords(entity.position);
+            self.ctm = self.g.getCTM();
+            self.offset = self.svg.getBoundingClientRect();
+            var entPos = self.convertCoords(entity.position);
             self.diff = {
                 x: p.x - entPos.x,
                 y: p.y - entPos.y
             };
-            ctm = ctm.inverse();
+            self.ctm = self.ctm.inverse();
             evt.stopPropagation();
             self.draggingEntity = entity;
             if (self.draggingEntity) {
@@ -2247,6 +2493,7 @@ var NodeCanvas = (function () {
             }
             self.g.removeChild(n.g);
         };
+        n.render(self.g);
     };
     ;
     NodeCanvas.prototype.init = function () {
@@ -2277,7 +2524,7 @@ exports.NodeCanvas = NodeCanvas;
 
 
 
-},{"./node":9,"./nodeconnector":11,"svg-pan-zoom":1}],11:[function(require,module,exports){
+},{"./node":10,"./nodeconnector":12,"svg-pan-zoom":1}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
@@ -2329,16 +2576,17 @@ exports.NodeConnector = NodeConnector;
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
-    function NodeValue(name, type, mode, node, options) {
+    function NodeValue(name, type, mode, node, options, multiple) {
         this.name = name;
         this.type = type;
         this.mode = mode;
+        this.multiple = multiple;
         this.options = options;
         this.inputConnector = null;
         this.__internalGetValue = null;
@@ -2431,7 +2679,7 @@ var NodeValue = (function () {
                     case "popup":
                         var btn = document.createElement("button");
                         btn.classList.add("popup-btn");
-                        btn.textContent = "[Edit]";
+                        btn.textContent = "*Edit";
                         var popup_1 = document.createElement("div");
                         popup_1.classList.add("codenodes-popup");
                         var popupLayer = document.createElement("div");
@@ -2486,7 +2734,12 @@ var NodeValue = (function () {
                 name_2.textContent = this.name;
                 name_2.setAttribute("x", "10");
                 name_2.setAttribute("y", "8");
-                type.textContent = "[" + this.type + "]";
+                if (this.multiple) {
+                    type.textContent = "[" + this.type + "]";
+                }
+                else {
+                    type.textContent = this.type;
+                }
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");

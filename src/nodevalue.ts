@@ -9,7 +9,7 @@ export class NodeValue {
 
     private name: string;
     public type: string;
-    private parentNode: Node;
+    public parentNode: Node;
     private dot : SVGCircleElement;
     private gOffset: Point;
     public inputConnector: NodeConnector;
@@ -17,13 +17,15 @@ export class NodeValue {
     public __internalGetValue: Function;
     private svgEntity: SVGGElement;
     private options: Array<any>;
+    public multiple: boolean;
 
 
 
-    constructor (name: string, type:string, mode: string, node: Node, options: any){
+    constructor (name: string, type:string, mode: string, node: Node, options: any, multiple: boolean){
         this.name = name;
         this.type = type;
         this.mode = mode;
+        this.multiple = multiple;
         this.options = options;
         this.inputConnector = null;
 		this.__internalGetValue = null;
@@ -119,7 +121,7 @@ export class NodeValue {
                     case "popup":
                         let btn = document.createElement("button");
                         btn.classList.add("popup-btn");
-                        btn.textContent = "[Edit]";
+                        btn.textContent = "*Edit";
                         let popup = document.createElement("div");
                         popup.classList.add("codenodes-popup");
                         let popupLayer = document.createElement("div");
@@ -181,7 +183,11 @@ export class NodeValue {
                 name.textContent = this.name;
                 name.setAttribute("x", "10");
                 name.setAttribute("y", "8");
-                type.textContent = "[" + this.type + "]";
+                if (this.multiple) {
+                    type.textContent = "[" + this.type + "]";
+                } else {
+                    type.textContent = this.type;
+                }
 				type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");

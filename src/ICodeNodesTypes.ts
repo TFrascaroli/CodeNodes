@@ -4,5 +4,6 @@ export interface ICodeNodesTypes {
     builder: Function;
     clone: Function;
     clonable: boolean;
+    outputType: string;
     schema: Array<schema>;
 };

@@ -6,4 +6,5 @@ export interface ICodeNodesValueSchema {
     type: string;
     mode: string;
     options: any;
+    multiple: boolean;
 }

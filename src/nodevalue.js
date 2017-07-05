@@ -3,10 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
-    function NodeValue(name, type, mode, node, options) {
+    function NodeValue(name, type, mode, node, options, multiple) {
         this.name = name;
         this.type = type;
         this.mode = mode;
+        this.multiple = multiple;
         this.options = options;
         this.inputConnector = null;
         this.__internalGetValue = null;
@@ -99,7 +100,7 @@ var NodeValue = (function () {
                     case "popup":
                         var btn = document.createElement("button");
                         btn.classList.add("popup-btn");
-                        btn.textContent = "[Edit]";
+                        btn.textContent = "*Edit";
                         var popup_1 = document.createElement("div");
                         popup_1.classList.add("codenodes-popup");
                         var popupLayer = document.createElement("div");
@@ -154,7 +155,12 @@ var NodeValue = (function () {
                 name_2.textContent = this.name;
                 name_2.setAttribute("x", "10");
                 name_2.setAttribute("y", "8");
-                type.textContent = "[" + this.type + "]";
+                if (this.multiple) {
+                    type.textContent = "[" + this.type + "]";
+                }
+                else {
+                    type.textContent = this.type;
+                }
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");

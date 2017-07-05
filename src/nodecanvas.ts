@@ -5,6 +5,7 @@ import {NodeConnector} from "./nodeconnector";
 
 const namespace = "http://www.w3.org/2000/svg";
 
+
 export class NodeCanvas {
 
     private pt: SVGPoint;
@@ -16,6 +17,10 @@ export class NodeCanvas {
     private draggingEntity: Node;
     private diff: Point;
     private zoomingSvg: SvgPanZoom.Instance;
+    public ondblclick: Function;
+    public onclick: Function;
+    private offset: ClientRect;
+    private ctm: SVGMatrix;
 
     constructor () {
         this.svg = null;
@@ -26,6 +31,10 @@ export class NodeCanvas {
         this.draggingEntity = null;
         this.currentConnector = null;
         this.diff = null;
+    }
+
+    center () {
+        this.zoomingSvg.reset();
     }
 
     cursorPoint(evt) {
@@ -50,33 +59,35 @@ export class NodeCanvas {
             this.g.setAttribute("transform", "matrix(1,1,1,1,0,0)");
             this.g.appendChild(this.paths);
             this.svg.appendChild(this.g);
-        }
-        this.nodes.forEach(function(node) {
-            node.render(self.g);
-        });
+            this.svg.addEventListener("dblclick", function (evt) {
+                if (!(evt.target instanceof SVGSVGElement)) return;
+                let p = self.cursorPoint(evt);
+                self.ctm = self.g.getCTM().inverse();
+                self.offset = self.svg.getBoundingClientRect();
+                self.ondblclick(self.convertCoords(p), p);
+            });
+            this.svg.addEventListener("click", function (evt) {
+                self.onclick();
+            });
+        };
     };
-
-    addNode (title, builder, schema, type, clonable, clonefn, x, y) {
-        var n = new Node(title, builder, schema, type, clonable, clonefn, x, y),
-            self = this,
-            ctm = null,
-            offset = null;
-
-        function convertCoords(o) {
-            var x = o.x,
-                y = o.y;
-            return {
-                x: (ctm.a * x) + (ctm.c * y) + ctm.e - offset.left,
-                y: (ctm.b * x) + (ctm.d * y) + ctm.f - offset.top
-            };
-        }
-
+    convertCoords(o: Point) {
+        var x = o.x,
+            y = o.y;
+        return {
+            x: (this.ctm.a * x) + (this.ctm.c * y) + this.ctm.e ,//- this.offset.left,
+            y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
+        };
+    }
+    addNode (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
+        var n = new Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y),
+            self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
                 var p = self.cursorPoint(evt);
                 p.x = p.x - self.diff.x;
                 p.y = p.y - self.diff.y;
-                let p1 = convertCoords(p);
+                let p1 = self.convertCoords(p);
                 self.draggingEntity.move(p1.x, p1.y);
             }
         }
@@ -89,18 +100,19 @@ export class NodeCanvas {
         }
 
         function mouseMoveConnectorHandler(evt) {
-            var p = convertCoords(self.cursorPoint(evt));
+            var p = self.convertCoords(self.cursorPoint(evt));
             self.currentConnector.moveEndPoint(p);
         }
 
         function mouseUpConnectorHandler(evt) {
-            var p = convertCoords(self.cursorPoint(evt));
+            let p = self.convertCoords(self.cursorPoint(evt));
             self.svg.removeEventListener("mousemove", mouseMoveConnectorHandler);
             self.svg.removeEventListener("mouseup", mouseUpConnectorHandler);
-            var dots = [].slice.call(document.querySelectorAll(".codenodes .dot"));
-            var candidates = dots.map(function(dot) {
-                var pos = dot.parentValue.getDotPosition();
-                var dist = Math.sqrt(Math.pow(p.x - pos.x, 2) + Math.pow(p.y - pos.y, 2));
+            let dots = [].slice.call(document.querySelectorAll(".codenodes .dot"));
+            let cc: NodeConnector = self.currentConnector;
+            let candidates = dots.map(function(dot) {
+                let pos = dot.parentValue.getDotPosition();
+                let dist = Math.sqrt(Math.pow(p.x - pos.x, 2) + Math.pow(p.y - pos.y, 2));
                 return {
                     dist: dist,
                     dot: dot
@@ -111,29 +123,33 @@ export class NodeCanvas {
                 return a.dist - b.dist;
             });
             if (candidates.length > 0) {
-                if (candidates[0].dot.parentValue.inputConnector) {
-                    candidates[0].dot.parentValue.inputConnector.remove();
+                let candidateDot = candidates[0].dot;
+                if (candidateDot.parentValue.inputConnector) {
+                    candidateDot.parentValue.inputConnector.remove();
                 }
-                candidates[0].dot.parentValue.inputConnector = self.currentConnector;
-                self.currentConnector.end2 = candidates[0].dot.parentValue;
-                if (self.currentConnector.end2.type !== "any" && (self.currentConnector.end2.type !== self.currentConnector.end1.type)) {
-                    self.currentConnector.remove();
+                candidateDot.parentValue.inputConnector = cc;
+                cc.end2 = candidateDot.parentValue;
+                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
+                    cc.remove();
                 }
-                if (self.currentConnector.end1 === candidates[0].dot.parentValue.parentNode) {
-                    self.currentConnector.remove();
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
                 }
-                candidates[0].dot.parentValue.updateConectorPosition();
+                if (cc.end2.parentNode.multiple) {
+                    cc.end2.parentNode.cloneLastValue();
+                }
+                candidateDot.parentValue.updateConectorPosition();
             } else {
-                self.currentConnector.remove();
+                cc.remove();
             }
             self.currentConnector = null;
         }
 
         this.nodes.push(n);
         n.outputMousedown = function(evt, entity) {
-            var p = self.cursorPoint(evt);
-            ctm = self.g.getCTM().inverse();
-            offset = self.svg.getBoundingClientRect();
+            let p = self.cursorPoint(evt);
+            self.ctm = self.g.getCTM().inverse();
+            self.offset = self.svg.getBoundingClientRect();
             let p1 = {
                 x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
                 y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
@@ -146,15 +162,15 @@ export class NodeCanvas {
             evt.stopPropagation();
         };
         n.onmousedown = function(evt, entity) {
-            var p = self.cursorPoint(evt);
-            ctm = self.g.getCTM();
-            offset = self.svg.getBoundingClientRect();
-            var entPos = convertCoords(entity.position);
+            let p = self.cursorPoint(evt);
+            self.ctm = self.g.getCTM();
+            self.offset = self.svg.getBoundingClientRect();
+            var entPos = self.convertCoords(entity.position);
             self.diff = {
                 x: p.x - entPos.x,
                 y: p.y - entPos.y
             };
-            ctm = ctm.inverse();
+            self.ctm = self.ctm.inverse();
             evt.stopPropagation();
             self.draggingEntity = entity;
             if (self.draggingEntity) {
@@ -171,6 +187,7 @@ export class NodeCanvas {
             }
             self.g.removeChild(n.g);
         }
+        n.render(self.g);
     };
 
     init () {
