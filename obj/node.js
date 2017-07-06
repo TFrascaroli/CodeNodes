@@ -4,33 +4,41 @@ var nodevalue_1 = require("./nodevalue");
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
-    function Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
+    function Node(opts) {
         var self = this;
-        this.title = title;
-        this.type = type;
-        this.values = {};
-        this.clonefn = clonefn;
-        this.clonable = clonable;
-        this.multiple = multiple;
-        this.outputType = outputType;
-        this.builder = builder;
+        this.options = opts;
+        this.values = [];
         this.position = {
-            x: x,
-            y: y
+            x: this.options.x,
+            y: this.options.y
         };
-        this.schema = schema;
-        this.nRows = this.schema.length + 2;
+        this.nRows = this.options.type.schema.length + 2;
         this.onmousedown = null;
         this.outputConnectors = [];
-        this.schema.forEach(function (prop) {
-            var name = prop.name;
-            if (self.multiple) {
-                name += " 0";
+        this.options.type.schema.forEach(function (prop) {
+            self.setValueDefaults(prop);
+            var p = prop;
+            if (self.options.isCollection) {
+                p = self.collectionValueOf(p);
             }
-            self.values[name] = new nodevalue_1.NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
+            self.values.push(new nodevalue_1.NodeValue(p, self));
         });
     }
     ;
+    Node.prototype.setValueDefaults = function (v) {
+        v.options = v.options || [];
+        v.multiple = v.multiple || false;
+    };
+    Node.prototype.collectionValueOf = function (v) {
+        return {
+            id: v.id,
+            name: v.name + " 0",
+            type: v.type,
+            mode: v.mode,
+            options: v.options,
+            multiple: v.multiple
+        };
+    };
     Node.prototype.render = function (parent) {
         var self = this;
         if (!this.g) {
@@ -53,7 +61,7 @@ var Node = (function () {
             }.bind(this);
             this.rect.addEventListener("mousedown", this.rectDownHandler);
             var t = document.createElementNS(namespace, "text");
-            t.textContent = this.title;
+            t.textContent = this.options.title;
             t.classList.add("title");
             t.setAttribute("x", "5");
             t.setAttribute("y", "15");
@@ -73,11 +81,11 @@ var Node = (function () {
             output.addEventListener("mousedown", this.outputDownHandler);
             var outputType = document.createElementNS(namespace, "text");
             this.outputText = outputType;
-            if (this.multiple) {
-                outputType.textContent = "[" + this.outputType + "]";
+            if (this.options.type.outputMultiple) {
+                outputType.textContent = "[" + this.options.type.outputType + "]";
             }
             else {
-                outputType.textContent = this.outputType;
+                outputType.textContent = this.options.type.outputType;
             }
             outputType.classList.add("output-type");
             outputType.setAttribute("x", (this.outputOffset.x - 10).toString());
@@ -97,27 +105,24 @@ var Node = (function () {
             parent.appendChild(this.g);
         }
         var i = 1;
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                val.render(self.g, i++);
-            }
+        this.values.forEach(function (val) {
+            val.render(self.g, i++);
         });
     };
     ;
     Node.prototype.cloneLastValue = function () {
         var self = this;
-        if (this.multiple) {
-            var full = Object.keys(self.values).every(function (k) {
-                var val = self.values[k];
-                return !self.values.hasOwnProperty(k) || val.inputConnector !== null;
+        if (this.options.isCollection) {
+            var schema = this.options.type.schema, full = self.values.every(function (val) {
+                return val.inputConnector !== null;
             });
             if (full) {
-                var prop = JSON.parse(JSON.stringify(this.schema[this.schema.length - 1])), name_1 = prop.name + " " + this.schema.length;
-                this.schema.push(prop);
+                var prop = JSON.parse(JSON.stringify(schema[schema.length - 1])), name_1 = prop.name + " " + schema.length;
+                schema.push(prop);
                 this.nRows++;
-                self.values[name_1] = new nodevalue_1.NodeValue(name_1, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
-                self.values[name_1].render(self.g, this.schema.length);
+                var newN = new nodevalue_1.NodeValue(prop, self);
+                self.values.push(newN);
+                newN.render(self.g, schema.length);
                 this.outputOffset.y = (this.nRows * ROW_HEIGHT) - 10;
                 this.output.setAttribute("cx", (this.outputOffset.x).toString());
                 this.output.setAttribute("cy", (this.outputOffset.y).toString());
@@ -140,30 +145,65 @@ var Node = (function () {
             };
             con.setPath();
         });
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                val.updateConectorPosition();
-            }
+        this.values.forEach(function (val) {
+            val.updateConectorPosition();
         });
         this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
     };
     ;
+    Node.prototype.serialize = function () {
+        var self = this, model = {
+            arguments: JSON.parse(JSON.stringify(this.options)),
+            values: this.values.map(function (v) {
+                return {
+                    valueID: v.options.id,
+                    value: v.__internalGetValue()
+                };
+            }),
+            outputConnectors: this.outputConnectors.map(function (c) {
+                return {
+                    nodeTo: c.end2.parentNode.options.id,
+                    valueTo: c.end2.options.id
+                };
+            })
+        };
+        return model;
+    };
+    ;
+    Node.prototype.findValue = function (id) {
+        var i, len = this.values.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.values[i].options.id === id)
+                return this.values[i];
+        }
+        return null;
+    };
+    Node.prototype.setValues = function (vs) {
+        var self = this;
+        if (!this.options.isCollection) {
+            vs.forEach(function (v) {
+                var value = self.values.filter(function (val) {
+                    return val.options.id === v.valueID;
+                })[0];
+                if (value.__internalSetValue instanceof Function) {
+                    value.__internalSetValue(v.value);
+                }
+            });
+        }
+    };
+    ;
     Node.prototype.build = function () {
         if (!this.built) {
-            var valuesArr = [], propsOnBuild = [], self = this;
-            propsOnBuild = this.schema.filter(function (p) {
-                return p.onBuild;
+            var schema = this.options.type.schema, valuesArr = [], self = this;
+            valuesArr = this.values.map(function (v) {
+                return v.getValue();
             });
-            valuesArr = propsOnBuild.map(function (p) {
-                return self.values[p.name].getValue();
-            });
-            this.built = this.builder.apply(this, valuesArr);
+            this.built = this.options.type.builder.apply(this, valuesArr);
             return this.built;
         }
         else {
-            if (this.clonable) {
-                return this.clonefn(this.built);
+            if (this.options.type.clonable) {
+                return this.options.type.clone(this.built);
             }
             else {
                 return this.built;
@@ -173,14 +213,11 @@ var Node = (function () {
     ;
     Node.prototype.remove = function () {
         var self = this;
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                if (val.inputConnector) {
-                    val.inputConnector.remove();
-                }
-                ;
+        this.values.forEach(function (val) {
+            if (val.inputConnector) {
+                val.inputConnector.remove();
             }
+            ;
         });
         [].concat(this.outputConnectors).forEach(function (con) {
             con.remove();

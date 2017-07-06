@@ -1,18 +1,20 @@
 import {NodeCanvas} from "./nodecanvas";
 import {CodeNodesMenu} from "./menu";
 import {Point} from "./point";
-import {ICodeNodesTypes} from "./ICodeNodesTypes";
-import {ICodeNodesValueSchema} from "./ICodeNodesValueSchema";
+import {ICodeNodesType} from "./interfaces/ICodeNodesType";
+import {ICodeNodesValueSchema} from "./interfaces/ICodeNodesValueSchema";
+import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
 
  export class CodeNodes {
     
     private canvas: NodeCanvas;
-    public types:{(key: string): ICodeNodesTypes};
+    public types:ICodeNodesType[];
     private menu: CodeNodesMenu;
     private menuPoint: Point;
+    private nodesCount: number = 0;
 
 
-    constructor (types: {(key: string): ICodeNodesTypes}) {
+    constructor (types: ICodeNodesType[]) {
         let self = this;
         this.canvas = new NodeCanvas();
         this.types = types;
@@ -40,14 +42,43 @@ import {ICodeNodesValueSchema} from "./ICodeNodesValueSchema";
         this.canvas.center();
     }
 
-    public addNode (name, type) {
-        let t = this.types[type];
+    private collectionTypeOf (t: ICodeNodesType): ICodeNodesType{
+        return {
+            id: t.id,
+            name: t.name,
+            description: "(Collection) " + t.description,
+            builder: this.collectionBuilder,
+            clone: this.collectionClone,
+            clonable: t.clonable,
+            outputType: t.outputType,
+            outputMultiple: true,
+            schema: [
+                <ICodeNodesValueSchema>{
+                    name: " - " + t,
+                    type: t.id,
+                    mode: "in",
+                    options: null,
+                    multiple: false
+                }
+            ]
+        };
+    }
+
+    public addNode (name: string, type: string) {
+        let t: ICodeNodesType = this.types[type];
         if (t) {
             let outputType = t.outputType || type;
-            let ot: ICodeNodesTypes = this.types[outputType];
+            let ot: ICodeNodesType = this.types[outputType];
             if (ot) {
                 let p = this.menuPoint || {x: 10, y: 10};
-                this.canvas.addNode(name, t.builder, t.schema, type, t.clonable || false, t.clone, false, outputType, p.x, p.y);
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: t,
+                    isCollection: false,
+                    x: p.x,
+                    y: p.y
+                });
             } else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
             }
@@ -72,23 +103,22 @@ import {ICodeNodesValueSchema} from "./ICodeNodesValueSchema";
         // }); TODO: Arreglar això
     };
     public addCollection (name, ofType: string) {
-        let t: ICodeNodesTypes = this.types[ofType];
+        let t: ICodeNodesType = this.types[ofType];
         if (t) {
             let outputType = t.outputType || ofType;
-            let ot: ICodeNodesTypes = this.types[outputType];
+            let ot: ICodeNodesType = this.types[outputType];
             if (ot) {
-                let collectionSchema: Array<ICodeNodesValueSchema> = [
-                    {
-                        onBuild: true,
-                        name: " - " + ofType,
-                        type: ofType,
-                        mode: "in",
-                        options: null,
-                        multiple: false
-                    }
-                ];
+
                 let p = this.menuPoint || {x: 10, y: 10};
-                this.canvas.addNode(name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y);
+                //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: this.collectionTypeOf(t),
+                    isCollection: true,
+                    x: p.x,
+                    y: p.y
+                });
             } else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
             }
@@ -96,4 +126,19 @@ import {ICodeNodesValueSchema} from "./ICodeNodesValueSchema";
             console.log("There is no type " + ofType + " registered");
         }
     };
+
+    serialize (): ICodeNodesModel {
+        return {
+            nodes: this.canvas.serialize(),
+            transform: this.canvas.getTransform()
+        };
+    };
+
+    parse (model: ICodeNodesModel) {
+        let self = this;
+        this.canvas.setTransform(model.transform);
+        model.nodes.forEach(nm => {
+            self.canvas.parse(model.nodes);
+        });
+    }
 }

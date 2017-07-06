@@ -1,7 +1,6 @@
 
-
 export interface ICodeNodesValueSchema {
-    onBuild: boolean;
+    id: number;
     name: string;
     type: string;
     mode: string;

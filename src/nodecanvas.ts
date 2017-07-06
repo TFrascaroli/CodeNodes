@@ -2,6 +2,8 @@ import * as svgPanZoom from "svg-pan-zoom";
 import {Point} from "./point";
 import {Node} from "./node";
 import {NodeConnector} from "./nodeconnector";
+import {INodeArguments} from "./interfaces/INodeArguments";
+import {INodeModel} from "./interfaces/INodeModel";
 
 const namespace = "http://www.w3.org/2000/svg";
 
@@ -71,6 +73,12 @@ export class NodeCanvas {
             });
         };
     };
+    getTransform(): string {
+        return this.g.getAttribute("transform");
+    };
+    setTransform(transform: string) {
+        this.g.setAttribute("transform", transform);
+    }
     convertCoords(o: Point) {
         var x = o.x,
             y = o.y;
@@ -79,8 +87,8 @@ export class NodeCanvas {
             y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
         };
     }
-    addNode (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
-        var n = new Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y),
+    addNode (opts: INodeArguments): Node {
+        var n = new Node(opts),
             self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
@@ -129,13 +137,15 @@ export class NodeCanvas {
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
-                    cc.remove();
-                }
                 if (cc.end1 === candidateDot.parentValue.parentNode) {
                     cc.remove();
+                    return;
                 }
-                if (cc.end2.parentNode.multiple) {
+                if (cc.end2.options.type !== "any" && cc.end2.options.type !== cc.end1.options.type.outputType) {
+                    cc.remove();
+                    return;
+                }
+                if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
                 candidateDot.parentValue.updateConectorPosition();
@@ -146,13 +156,13 @@ export class NodeCanvas {
         }
 
         this.nodes.push(n);
-        n.outputMousedown = function(evt, entity) {
+        n.outputMousedown = function(evt, entity: Node) {
             let p = self.cursorPoint(evt);
             self.ctm = self.g.getCTM().inverse();
             self.offset = self.svg.getBoundingClientRect();
             let p1 = {
-                x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
-                y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
+                x: entity.position.x + parseInt(entity.outputOffset.x.toString()),
+                y: entity.position.y + parseInt(entity.outputOffset.y.toString())
             }
             self.currentConnector = new NodeConnector(p1, entity);
             entity.outputConnectors.push(self.currentConnector);
@@ -188,6 +198,7 @@ export class NodeCanvas {
             self.g.removeChild(n.g);
         }
         n.render(self.g);
+        return n;
     };
 
     init () {
@@ -197,6 +208,49 @@ export class NodeCanvas {
             dblClickZoomEnabled: false
         });
     };
+
+    serialize (): INodeModel[] {
+        return this.nodes.map(n => {
+            return n.serialize();
+        });
+    }
+
+    findNode (id: number): Node {
+        let i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id) return this.nodes[i];
+        }
+        return null;
+    }
+
+    parse (nodes: INodeModel[]) {
+        let self = this;
+        nodes.forEach(nm => {
+            let n = self.addNode(nm.arguments);
+            n.setValues(nm.values);
+        });
+
+        nodes.forEach(nm => {
+            let n = self.findNode(nm.arguments.id);
+            nm.outputConnectors.forEach(cn => {
+                let end2 = self.findNode(cn.nodeTo);
+                let p1 = {
+                    x: end2.position.x + parseInt(end2.outputOffset.x.toString()),
+                    y: end2.position.y + parseInt(end2.outputOffset.y.toString())
+                }
+                let conn = new NodeConnector(p1, end2);
+                end2.outputConnectors.push(self.currentConnector);
+                self.paths.appendChild(self.currentConnector.path);
+
+                if (end2.options.isCollection) {
+                    end2.cloneLastValue();
+                }
+                let val = end2.findValue(cn.valueTo);
+                val.inputConnector = conn;
+                val.updateConectorPosition();
+            });
+        });
+    }
 
     clear() {
 		//Alert the user about the action being irreversible

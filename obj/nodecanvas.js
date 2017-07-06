@@ -55,6 +55,13 @@ var NodeCanvas = (function () {
         ;
     };
     ;
+    NodeCanvas.prototype.getTransform = function () {
+        return this.g.getAttribute("transform");
+    };
+    ;
+    NodeCanvas.prototype.setTransform = function (transform) {
+        this.g.setAttribute("transform", transform);
+    };
     NodeCanvas.prototype.convertCoords = function (o) {
         var x = o.x, y = o.y;
         return {
@@ -62,8 +69,8 @@ var NodeCanvas = (function () {
             y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
         };
     };
-    NodeCanvas.prototype.addNode = function (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
-        var n = new node_1.Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y), self = this;
+    NodeCanvas.prototype.addNode = function (opts) {
+        var n = new node_1.Node(opts), self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
                 var p = self.cursorPoint(evt);
@@ -108,13 +115,15 @@ var NodeCanvas = (function () {
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
-                    cc.remove();
-                }
                 if (cc.end1 === candidateDot.parentValue.parentNode) {
                     cc.remove();
+                    return;
                 }
-                if (cc.end2.parentNode.multiple) {
+                if (cc.end2.options.type !== "any" && cc.end2.options.type !== cc.end1.options.type.outputType) {
+                    cc.remove();
+                    return;
+                }
+                if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
                 candidateDot.parentValue.updateConectorPosition();
@@ -167,6 +176,7 @@ var NodeCanvas = (function () {
             self.g.removeChild(n.g);
         };
         n.render(self.g);
+        return n;
     };
     ;
     NodeCanvas.prototype.init = function () {
@@ -177,6 +187,42 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.serialize = function () {
+        return this.nodes.map(function (n) {
+            return n.serialize();
+        });
+    };
+    NodeCanvas.prototype.findNode = function (id) {
+        var i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id)
+                return this.nodes[i];
+        }
+        return null;
+    };
+    NodeCanvas.prototype.parse = function (nodes) {
+        var self = this;
+        nodes.forEach(function (nm) {
+            var n = self.addNode(nm.arguments);
+            n.setValues(nm.values);
+        });
+        nodes.forEach(function (nm) {
+            var n = self.findNode(nm.arguments.id);
+            nm.outputConnectors.forEach(function (cn) {
+                var end2 = self.findNode(cn.nodeTo);
+                var p1 = {
+                    x: end2.position.x + parseInt(end2.output.getAttribute("cx")),
+                    y: end2.position.y + parseInt(end2.output.getAttribute("cy"))
+                };
+                self.currentConnector = new nodeconnector_1.NodeConnector(p1);
+                if (end2.options.isCollection) {
+                    end2.cloneLastValue();
+                }
+                end2.findValue(cn.valueTo).inputConnector =
+                ;
+            });
+        });
+    };
     NodeCanvas.prototype.clear = function () {
         //Alert the user about the action being irreversible
         var nds = [].concat(this.nodes);

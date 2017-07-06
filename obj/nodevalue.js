@@ -3,12 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
-    function NodeValue(name, type, mode, node, options, multiple) {
-        this.name = name;
-        this.type = type;
-        this.mode = mode;
-        this.multiple = multiple;
-        this.options = options;
+    function NodeValue(opts, node) {
+        this.options = opts;
         this.inputConnector = null;
         this.__internalGetValue = null;
         this.svgEntity = null;
@@ -25,68 +21,45 @@ var NodeValue = (function () {
             };
             ent.setAttribute("transform", "translate(" + this.gOffset.x + ", " + this.gOffset.y + ")");
             ent.setAttribute("class", "row");
-            if (this.mode === "edit") {
+            if (this.options.mode === "edit") {
                 var rect = document.createElementNS(namespace, "rect"), fo = document.createElementNS(namespace, "foreignObject"), name_1 = document.createElementNS(namespace, "text"), div = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                name_1.textContent = this.name;
+                name_1.textContent = this.options.name;
                 name_1.setAttribute("x", "10");
                 name_1.setAttribute("y", "6");
                 rect.setAttribute("x", "1");
                 div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
                 var input_1 = document.createElement("input");
-                switch (this.type) {
+                switch (this.options.type) {
                     case "range":
-                        this.__internalGetValue = function () {
-                            input_1.min = this.options[0];
-                            input_1.max = this.options[1];
-                            if (input_1.value <= input_1.max && input_1.value >= input_1.min) {
-                                return input_1.value;
-                            }
-                            else {
-                                // error range?
-                            }
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
+                        input_1.min = this.options[0];
+                        input_1.max = this.options[1];
                     case "text":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "number":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "email":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "date":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "color":
                         this.__internalGetValue = function () {
-                            console.log(input_1.value);
                             return input_1.value;
                         };
-                        input_1.type = this.type;
+                        this.__internalSetValue = function (v) {
+                            input_1.value = v;
+                        };
+                        input_1.type = this.options.type;
+                        div.appendChild(input_1);
+                        break;
+                    case "boolean":
+                        this.__internalGetValue = function () {
+                            return input_1.checked;
+                        };
+                        this.__internalSetValue = function (v) {
+                            input_1.checked = v;
+                        };
+                        input_1.type = "checkbox";
                         div.appendChild(input_1);
                         break;
                     case "select":
                         var div_select_1 = document.createElement("select");
-                        this.options.forEach(function (op) {
+                        this.options.options.forEach(function (op) {
                             var div_option = document.createElement("option");
                             div_option.textContent = op.show.toString();
                             div_option.setAttribute("value", op.save);
@@ -94,6 +67,9 @@ var NodeValue = (function () {
                         });
                         this.__internalGetValue = function () {
                             return div_select_1.value;
+                        };
+                        this.__internalSetValue = function (v) {
+                            input_1.value = v;
                         };
                         div.appendChild(div_select_1);
                         break;
@@ -129,6 +105,9 @@ var NodeValue = (function () {
                         this.__internalGetValue = function () {
                             return popupTextArea_1.textContent;
                         };
+                        this.__internalSetValue = function (v) {
+                            popupTextArea_1.textContent = v;
+                        };
                         document.body.appendChild(popup_1);
                         div.appendChild(btn);
                         break;
@@ -139,7 +118,7 @@ var NodeValue = (function () {
                 ent.appendChild(name_1);
                 ent.appendChild(fo);
             }
-            if (this.mode === "in") {
+            if (this.options.mode === "in") {
                 var name_2 = document.createElementNS(namespace, "text"), type = document.createElementNS(namespace, "text"), dot = document.createElementNS(namespace, "circle");
                 dot.setAttribute("cx", "-1");
                 dot.setAttribute("cy", "16");
@@ -152,21 +131,27 @@ var NodeValue = (function () {
                     evt.stopPropagation();
                 });
                 dot["parentValue"] = this;
-                name_2.textContent = this.name;
+                name_2.textContent = this.options.name;
                 name_2.setAttribute("x", "10");
                 name_2.setAttribute("y", "8");
-                if (this.multiple) {
-                    type.textContent = "[" + this.type + "]";
+                if (this.options.multiple) {
+                    type.textContent = "[" + this.options.type + "]";
                 }
                 else {
-                    type.textContent = this.type;
+                    type.textContent = this.options.type;
                 }
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
                 this.__internalGetValue = function () {
-                    if (this.inputConnector) {
-                        return this.inputConnector.end1.build();
+                    if (self.inputConnector) {
+                        var built = self.inputConnector.end1.build();
+                        if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
+                            return [built];
+                        }
+                        else {
+                            return built;
+                        }
                     }
                     return undefined;
                 };
@@ -179,6 +164,12 @@ var NodeValue = (function () {
         }
     };
     ;
+    NodeValue.prototype.getSerializedValue = function () {
+        if (this.options.mode === "edit" && this.__internalGetValue instanceof Function) {
+            return this.__internalGetValue();
+        }
+        return null;
+    };
     NodeValue.prototype.getDotPosition = function () {
         return {
             x: this.parentNode.position.x + this.gOffset.x - 1,

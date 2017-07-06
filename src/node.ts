@@ -1,31 +1,30 @@
 import {NodeValue} from "./nodevalue";
 import {NodeConnector} from "./nodeconnector";
 import {Point} from "./point";
-import {ICodeNodesValueSchema} from "./ICodeNodesValueSchema";
+import {ICodeNodesValueSchema} from "./interfaces/ICodeNodesValueSchema";
+import {INodeArguments} from "./interfaces/INodeArguments";
+import {INodeModel} from "./interfaces/INodeModel";
 
 
 const namespace = "http://www.w3.org/2000/svg";
 const ROW_HEIGHT = 38;
 
+
+declare type NodeValueModel = {valueID:number, value: any};
+declare type NodeConnectorModel = {valueID:number, nodeID: number};
+
 export class Node {
 
-    private title: string;
     private rect: SVGRectElement;
     public g: SVGGElement;
     private output: SVGCircleElement;
     private closeBtn: SVGCircleElement;
     private built: any;
-    private builder: Function;
-    private clonefn: Function;
-    private clonable: boolean;
-    public multiple: boolean;
-    private outputOffset: Point;
-    public type: string;
-    public outputType: string;
+    public outputOffset: Point;
     private outputText: SVGTextElement;
-    private values: {[valueName:string]:NodeValue};
+    private values: NodeValue[];
     public position: Point;
-    private schema: Array<ICodeNodesValueSchema>; // Canviar això a l'interfície correcta.
+    public options: INodeArguments;
     private nRows: number;
     public onmousedown: Function;
     public outputMousedown: Function;
@@ -36,32 +35,43 @@ export class Node {
     public onremove: Function;
 
 
-    constructor(title: string, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
+    constructor(opts: INodeArguments) {
         let self = this;
-        this.title = title;
-        this.type = type;
-        this.values = {};
-        this.clonefn = clonefn;
-        this.clonable = clonable;
-        this.multiple = multiple;
-        this.outputType = outputType;
-        this.builder = builder;
+        this.options = opts;
+        this.values = [];
         this.position = {
-            x: x,
-            y: y
+            x: this.options.x,
+            y: this.options.y
         };
-        this.schema = schema;
-        this.nRows = this.schema.length + 2;
+        this.nRows = this.options.type.schema.length + 2;
         this.onmousedown = null;
         this.outputConnectors = [];
-        this.schema.forEach(function(prop) {
-            let name = prop.name;
-            if (self.multiple) {
-                name += " 0";
+        this.options.type.schema.forEach(function(prop) {
+            self.setValueDefaults(prop)
+            let p = prop;
+            if (self.options.isCollection) {
+                p = self.collectionValueOf(p);
             }
-            self.values[name] = new NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
+            self.values.push(new NodeValue(p, self));
         });
     };
+
+    private setValueDefaults(v: ICodeNodesValueSchema) {
+        v.options = v.options || [];
+        v.multiple = v.multiple || false;
+        v.mode = v.mode || "edit";
+    }
+
+    private collectionValueOf(v: ICodeNodesValueSchema): ICodeNodesValueSchema{
+        return {
+            id: v.id,
+            name: v.name + " 0",
+            type: v.type,
+            mode: v.mode,
+            options: v.options,
+            multiple: v.multiple
+        };
+    }
 
     render(parent: SVGElement) {
         let self = this;
@@ -89,7 +99,7 @@ export class Node {
 
 
             let t = document.createElementNS(namespace, "text");
-            t.textContent = this.title;
+            t.textContent = this.options.title;
             t.classList.add("title");
             t.setAttribute("x", "5");
             t.setAttribute("y", "15");
@@ -111,10 +121,10 @@ export class Node {
             output.addEventListener("mousedown", this.outputDownHandler);
             let outputType = document.createElementNS(namespace, "text");
             this.outputText = outputType;
-            if (this.multiple) {  
-                outputType.textContent = "[" + this.outputType + "]";
+            if (this.options.type.outputMultiple) {  
+                outputType.textContent = "[" + this.options.type.outputType + "]";
             } else {
-                outputType.textContent = this.outputType;
+                outputType.textContent = this.options.type.outputType;
             }
             outputType.classList.add("output-type");
             outputType.setAttribute("x", (this.outputOffset.x - 10).toString());
@@ -138,27 +148,25 @@ export class Node {
         }
         let i = 1;
 
-        Object.keys(this.values).forEach(function(k) {
-            if (self.values.hasOwnProperty(k)) {
-                let val = self.values[k];
-                val.render(self.g, i++);
-            }
+        this.values.forEach(function(val) {
+            val.render(self.g, i++);
         });
     };
     cloneLastValue () {
         let self = this;
-        if (this.multiple) {
-            let full = Object.keys(self.values).every((k: string):boolean => {
-                let val: NodeValue = self.values[k];
-                return !self.values.hasOwnProperty(k) || val.inputConnector !== null;
+        if (this.options.isCollection) {
+            let schema = this.options.type.schema,
+            full = self.values.every(val => {
+                return val.inputConnector !== null;
             });
             if (full) {
-                let prop = JSON.parse(JSON.stringify(this.schema[this.schema.length - 1])),
-                    name = prop.name + " " + this.schema.length;
-                this.schema.push(prop);
+                let prop = JSON.parse(JSON.stringify(schema[schema.length - 1])),
+                    name = prop.name + " " + schema.length;
+                schema.push(prop);
                 this.nRows++;
-                self.values[name] = new NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
-                self.values[name].render(self.g, this.schema.length);
+                let newN = new NodeValue(prop, self)
+                self.values.push(newN);
+                newN.render(self.g, schema.length);
                 this.outputOffset.y = (this.nRows * ROW_HEIGHT) - 10;
                 
                 this.output.setAttribute("cx", (this.outputOffset.x).toString());
@@ -182,31 +190,67 @@ export class Node {
             con.setPath();
         });
 
-        Object.keys(this.values).forEach(function(k) {
-            if (self.values.hasOwnProperty(k)) {
-                let val = self.values[k];
-                val.updateConectorPosition();
-            }
+        this.values.forEach(function(val) {
+            val.updateConectorPosition();
         });
         this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
     };
 
+    serialize (): INodeModel {
+        let self = this,
+            model = <INodeModel> {
+            arguments: JSON.parse(JSON.stringify(this.options)),
+            values: this.values.map(v => {
+                return {
+                    valueID: v.options.id,
+                    value: v.__internalGetValue()
+                };
+            }),
+            outputConnectors: this.outputConnectors.map(c => {
+                return {
+                    nodeTo: c.end2.parentNode.options.id,
+                    valueTo: c.end2.options.id
+                };
+            })
+        };
+        return model;
+    };
+
+    findValue (id: number): NodeValue {
+        let i, len = this.values.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.values[i].options.id === id) return this.values[i];
+        }
+        return null;
+    }
+
+    setValues (vs: NodeValueModel[]) {
+        let self = this;
+        if (!this.options.isCollection) {
+            vs.forEach(v => {
+                let value = self.values.filter(val => {
+                    return val.options.id === v.valueID;
+                })[0];
+                if (value.__internalSetValue instanceof Function) {
+                    value.__internalSetValue(v.value);
+                }
+            });
+        }
+    };
+
     build() {
         if (!this.built) {
-			var valuesArr = [],
-				propsOnBuild = [],
+			var schema = this.options.type.schema,
+                valuesArr = [],
 				self = this;
-			propsOnBuild = this.schema.filter(function(p) {
-				return p.onBuild;
+			valuesArr = this.values.map(function(v) {
+				return v.getValue();
 			});
-			valuesArr = propsOnBuild.map(function(p) {
-				return self.values[p.name].getValue();
-			});
-			this.built =  this.builder.apply(this, valuesArr);
+			this.built =  this.options.type.builder.apply(this, valuesArr);
 			return this.built;
 		} else {
-			if (this.clonable) {
-				return this.clonefn(this.built);
+			if (this.options.type.clonable) {
+				return this.options.type.clone(this.built);
 			} else {
 				return this.built;
 			}
@@ -215,13 +259,10 @@ export class Node {
 
     remove() {
         let self = this;
-        Object.keys(this.values).forEach(function(k) {
-            if (self.values.hasOwnProperty(k)) {
-                let val = self.values[k];
-                if (val.inputConnector) {
-                    val.inputConnector.remove();
-                };
-            }
+        this.values.forEach(function(val) {
+            if (val.inputConnector) {
+                val.inputConnector.remove();
+            };
         });
         [].concat(this.outputConnectors).forEach(function(con) {
             con.remove();

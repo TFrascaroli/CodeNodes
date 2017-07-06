@@ -4,6 +4,7 @@ var nodecanvas_1 = require("./nodecanvas");
 var menu_1 = require("./menu");
 var CodeNodes = (function () {
     function CodeNodes(types) {
+        this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
         this.types = types;
@@ -30,6 +31,27 @@ var CodeNodes = (function () {
     CodeNodes.prototype.center = function () {
         this.canvas.center();
     };
+    CodeNodes.prototype.collectionTypeOf = function (t) {
+        return {
+            id: t.id,
+            name: t.name,
+            description: "(Collection) " + t.description,
+            builder: this.collectionBuilder,
+            clone: this.collectionClone,
+            clonable: t.clonable,
+            outputType: t.outputType,
+            outputMultiple: true,
+            schema: [
+                {
+                    name: " - " + t,
+                    type: t.id,
+                    mode: "in",
+                    options: null,
+                    multiple: false
+                }
+            ]
+        };
+    };
     CodeNodes.prototype.addNode = function (name, type) {
         var t = this.types[type];
         if (t) {
@@ -37,7 +59,14 @@ var CodeNodes = (function () {
             var ot = this.types[outputType];
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
-                this.canvas.addNode(name, t.builder, t.schema, type, t.clonable || false, t.clone, false, outputType, p.x, p.y);
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: t,
+                    isCollection: false,
+                    x: p.x,
+                    y: p.y
+                });
             }
             else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
@@ -72,18 +101,16 @@ var CodeNodes = (function () {
             var outputType = t.outputType || ofType;
             var ot = this.types[outputType];
             if (ot) {
-                var collectionSchema = [
-                    {
-                        onBuild: true,
-                        name: " - " + ofType,
-                        type: ofType,
-                        mode: "in",
-                        options: null,
-                        multiple: false
-                    }
-                ];
                 var p = this.menuPoint || { x: 10, y: 10 };
-                this.canvas.addNode(name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y);
+                //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: this.collectionTypeOf(t),
+                    isCollection: true,
+                    x: p.x,
+                    y: p.y
+                });
             }
             else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
@@ -94,6 +121,12 @@ var CodeNodes = (function () {
         }
     };
     ;
+    CodeNodes.prototype.serialize = function () {
+        return {
+            nodes: this.canvas.serialize(),
+            transform: this.canvas.getTransform()
+        };
+    };
     return CodeNodes;
 }());
 exports.CodeNodes = CodeNodes;

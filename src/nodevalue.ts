@@ -1,32 +1,25 @@
 import {Node} from "./node";
 import {Point} from "./point";
 import {NodeConnector} from "./nodeconnector";
+import {ICodeNodesValueSchema} from "./interfaces/ICodeNodesValueSchema";
 
 const namespace = "http://www.w3.org/2000/svg";
 const ROW_HEIGHT = 38;
 
 export class NodeValue {
-
-    private name: string;
-    public type: string;
     public parentNode: Node;
     private dot : SVGCircleElement;
     private gOffset: Point;
     public inputConnector: NodeConnector;
-    private mode: string;
     public __internalGetValue: Function;
+    public __internalSetValue: Function;
     private svgEntity: SVGGElement;
-    private options: Array<any>;
-    public multiple: boolean;
+    public options: ICodeNodesValueSchema;
 
 
 
-    constructor (name: string, type:string, mode: string, node: Node, options: any, multiple: boolean){
-        this.name = name;
-        this.type = type;
-        this.mode = mode;
-        this.multiple = multiple;
-        this.options = options;
+    constructor (opts: ICodeNodesValueSchema, node: Node){
+        this.options = opts;
         this.inputConnector = null;
 		this.__internalGetValue = null;
         this.svgEntity = null;
@@ -44,70 +37,48 @@ export class NodeValue {
             };
             ent.setAttribute("transform", "translate(" + this.gOffset.x + ", " + this.gOffset.y + ")");
             ent.setAttribute("class", "row");
-            if (this.mode === "edit") {
+            if (this.options.mode === "edit") {
                 let rect = document.createElementNS(namespace, "rect"),
                     fo = document.createElementNS(namespace, "foreignObject"),
                     name = document.createElementNS(namespace, "text"),
                     div = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                name.textContent = this.name;
+                name.textContent = this.options.name;
                 name.setAttribute("x", "10");
                 name.setAttribute("y", "6");
                 rect.setAttribute("x", "1");
                 div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
                 let input = document.createElement("input");
-                switch(this.type) {
+                switch(this.options.type) {
                     case "range":
-                        this.__internalGetValue = function () {
-                                input.min = this.options[0];
-                                input.max = this.options[1];
-                                if(input.value <= input.max && input.value >= input.min) {
-                                    return input.value;
-                                } else {
-                                    // error range?
-                                }
-                        };
-                        input.type = this.type;
-                        div.appendChild(input);
-                        break;
+                        input.min = this.options[0];
+                        input.max = this.options[1];
                     case "text":
-                        this.__internalGetValue = function () {
-                            return input.value;
-                        };
-                        input.type = this.type;
-                        div.appendChild(input);
-                        break;
                     case "number":
-                        this.__internalGetValue = function () {
-                                return input.value;
-                        };
-                        input.type = this.type;
-                        div.appendChild(input);
-                        break;
                     case "email":
-                        this.__internalGetValue = function () {
-                            return input.value;
-                        };
-                        input.type = this.type;
-                        div.appendChild(input);
-                        break;
                    case "date":
-                        this.__internalGetValue = function () {
-                                return input.value;
-                            };
-                        input.type = this.type;
-                        div.appendChild(input);
-                        break;
                    case "color":
                         this.__internalGetValue = function () {
-                                console.log(input.value);
-                                return input.value;
-                            };
-                        input.type = this.type;
+                            return input.value;
+                        };
+                        this.__internalSetValue = function (v: string) {
+                            input.value = v;
+                        };
+                        input.type = this.options.type;
+                        div.appendChild(input);
+                        break;
+                   case "boolean":
+                        this.__internalGetValue = function () {
+                            return input.checked;
+                        };
+                        this.__internalSetValue = function (v: boolean) {
+                            input.checked = v;
+                        };
+                        input.type = "checkbox";
                         div.appendChild(input);
                         break;
                     case "select":
                         let div_select = document.createElement("select");
-                        this.options.forEach( op =>{
+                        this.options.options.forEach( op =>{
                             let div_option = document.createElement("option");
                             div_option.textContent =op.show.toString();
                             div_option.setAttribute("value", op.save);
@@ -115,6 +86,9 @@ export class NodeValue {
                         });
                         this.__internalGetValue = function () {
                             return div_select.value;
+                        };
+                        this.__internalSetValue = function (v: string) {
+                            input.value = v;
                         };
                         div.appendChild(div_select);
                         break;
@@ -153,6 +127,9 @@ export class NodeValue {
                         this.__internalGetValue = function () {
                             return popupTextArea.textContent;
                         };
+                        this.__internalSetValue = function (v: string) {
+                            popupTextArea.textContent = v;
+                        };
                         document.body.appendChild(popup);
                         div.appendChild(btn);
                         break;
@@ -164,7 +141,7 @@ export class NodeValue {
                 ent.appendChild(fo);
             }
 
-            if (this.mode === "in") {
+            if (this.options.mode === "in") {
                 let name = document.createElementNS(namespace, "text"),
                     type = document.createElementNS(namespace, "text"),
                     dot = document.createElementNS(namespace, "circle");
@@ -180,20 +157,25 @@ export class NodeValue {
                     evt.stopPropagation();
                 });
                 dot["parentValue"] = this;
-                name.textContent = this.name;
+                name.textContent = this.options.name;
                 name.setAttribute("x", "10");
                 name.setAttribute("y", "8");
-                if (this.multiple) {
-                    type.textContent = "[" + this.type + "]";
+                if (this.options.multiple) {
+                    type.textContent = "[" + this.options.type + "]";
                 } else {
-                    type.textContent = this.type;
+                    type.textContent = this.options.type;
                 }
 				type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
 				this.__internalGetValue = function () {
-					if (this.inputConnector) {
-						return this.inputConnector.end1.build();
+					if (self.inputConnector) {
+                        let built = self.inputConnector.end1.build();
+                        if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
+                            return [built];
+                        } else {
+						    return built;
+                        }
 					}
 					return undefined
 				};
@@ -206,6 +188,13 @@ export class NodeValue {
             parent.appendChild(ent);
         }
     };
+
+    getSerializedValue () {
+        if (this.options.mode === "edit" && this.__internalGetValue instanceof Function) {
+            return this.__internalGetValue();
+        }
+        return null;
+    }
 
     getDotPosition(){
         return {

@@ -4,18 +4,18 @@ var gulp = require('gulp');
 
 // Include Our Plugins
 
-var browserify  = require("browserify"),
-    source      = require("vinyl-source-stream"),
-    buffer      = require("vinyl-buffer"),
-    tslint      = require("gulp-tslint"),
-    ts          = require("gulp-typescript"),
-    sourcemaps  = require("gulp-sourcemaps"),
-    uglify      = require("gulp-uglify"),
-    less        = require('gulp-less'),
-    rename      = require('gulp-rename'),
-    merge       = require('merge-stream'),
-    cssmin      = require('gulp-cssmin'),
-    util        = require('gulp-util');
+var browserify = require("browserify"),
+    source = require("vinyl-source-stream"),
+    buffer = require("vinyl-buffer"),
+    tslint = require("gulp-tslint"),
+    ts = require("gulp-typescript"),
+    sourcemaps = require("gulp-sourcemaps"),
+    uglify = require("gulp-uglify"),
+    less = require('gulp-less'),
+    rename = require('gulp-rename'),
+    merge = require('merge-stream'),
+    cssmin = require('gulp-cssmin'),
+    util = require('gulp-util');
 
 var tsProject = ts.createProject("tsconfig.json");
 var tsTestProject = ts.createProject("tsconfig.json");
@@ -28,37 +28,37 @@ gulp.task("build-app", function() {
         .pipe(sourcemaps.init())
         .pipe(tsProject())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest("src/"));
+        .pipe(gulp.dest("obj/"));
 });
 
 // Lint Task
 gulp.task("lint", function() {
     return gulp.src([
-        "src/**/**.ts",
-        "test/**/**.test.ts"
-    ])
-    .pipe(tslint({ }))
-    .pipe(tslint({
-        formatter: "verbose"
-    }))
-    .pipe(tslint.report())
+            "src/**/**.ts",
+            "test/**/**.test.ts"
+        ])
+        .pipe(tslint({}))
+        .pipe(tslint({
+            formatter: "verbose"
+        }))
+        .pipe(tslint.report())
 });
 
 gulp.task("bundle", ["build-app"], function() {
 
     var libraryName = "codenodes";
-    var mainTsFilePath = "src/codenodes.js";
-    var outputFolder   = "dist/";
+    var mainTsFilePath = "obj/codenodes.js";
+    var outputFolder = "dist/";
     var outputFileName = "codenodes.js";
     var outputFileNameMin = "codenodes.min.js";
 
     var bundler = browserify({
         debug: false,
-        standalone : libraryName
+        standalone: libraryName
     });
     var b2 = browserify({
         debug: false,
-        standalone : libraryName
+        standalone: libraryName
     });
     var s1 = b2.add(mainTsFilePath)
         .bundle()
@@ -77,7 +77,7 @@ gulp.task("bundle", ["build-app"], function() {
 });
 
 
-gulp.task('less', function () {
+gulp.task('less', function() {
     return gulp.src('src/codenodes.less')
         .pipe(less({ style: 'compressed' }).on('error', util.log))
         //.pipe(autoprefix('last 10 version'))
@@ -90,7 +90,7 @@ gulp.task('less', function () {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-    gulp.watch([ "src/**/**.ts"], ["lint", "bundle"]);
+    gulp.watch(["src/**/**.ts"], ["lint", "bundle"]);
     gulp.watch('src/codenodes.less', ['less']);
 });
 
