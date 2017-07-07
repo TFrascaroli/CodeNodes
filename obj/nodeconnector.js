@@ -46,5 +46,3 @@ var NodeConnector = (function () {
     return NodeConnector;
 }());
 exports.NodeConnector = NodeConnector;
-
-//# sourceMappingURL=nodeconnector.js.map

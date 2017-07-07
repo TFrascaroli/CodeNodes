@@ -23,11 +23,9 @@ var tsTestProject = ts.createProject("tsconfig.json");
 
 gulp.task("build-app", function() {
     return gulp.src([
-            "src/**/**.ts",
-            "typings/main.d.ts/"
+            "src/**/**.ts"
         ])
-        .pipe(sourcemaps.init())
-        .pipe(tsProject()).pipe(sourcemaps.write('.')).pipe(gulp.dest('./obj/'));
+        .pipe(tsProject()).pipe(gulp.dest('./obj/'));
 });
 
 gulp.task('definitions', function(done) {

@@ -206,5 +206,3 @@ var NodeValue = (function () {
     return NodeValue;
 }());
 exports.NodeValue = NodeValue;
-
-//# sourceMappingURL=nodevalue.js.map

@@ -22,17 +22,6 @@ declare module 'codenodes' {
         parse(model: ICodeNodesModel): void;
         getOfType(type: string): Node[];
     }
-    export * from "codenodes/nodecanvas";
-    export * from "codenodes/node";
-    export * from "codenodes/menu";
-    export * from "codenodes/point";
-    export * from "codenodes/interfaces/ICodeNodesModel";
-    export * from "codenodes/interfaces/ICodeNodesType";
-    export * from "codenodes/interfaces/ICodeNodesValueSchema";
-    export * from "codenodes/interfaces/INodeArguments";
-    export * from "codenodes/interfaces/INodeModel";
-    export * from "codenodes/nodeconnector";
-    export * from "codenodes/nodevalue";
 }
 
 declare module 'codenodes/nodecanvas' {
@@ -111,10 +100,10 @@ declare module 'codenodes/node' {
 }
 
 declare module 'codenodes/menu' {
-    import * as CN from "codenodes/codenodes";
+    import { CodeNodes } from "codenodes/codenodes";
     export class CodeNodesMenu {
         g: SVGGElement;
-        constructor(main: CN.CodeNodes);
+        constructor(main: CodeNodes);
         open(x: number, y: number): void;
         close(): void;
     }
@@ -157,17 +146,6 @@ declare module 'codenodes/point' {
     }
 }
 
-declare module 'codenodes/interfaces/ICodeNodesValueSchema' {
-    export interface ICodeNodesValueSchema {
-        id: number;
-        name: string;
-        type: string;
-        mode: string;
-        options: any;
-        multiple: boolean;
-    }
-}
-
 declare module 'codenodes/interfaces/INodeArguments' {
     import { ICodeNodesType } from "codenodes/interfaces/ICodeNodesType";
     export interface INodeArguments {
@@ -195,23 +173,6 @@ declare module 'codenodes/interfaces/INodeModel' {
     }
 }
 
-declare module 'codenodes/nodeconnector' {
-    import { Node } from "codenodes/node";
-    import { Point } from "codenodes/point";
-    import { NodeValue } from "codenodes/nodevalue";
-    export class NodeConnector {
-        end1: Node;
-        end2: NodeValue;
-        sp: Point;
-        ep: Point;
-        path: SVGPathElement;
-        constructor(sp: Point, node: Node);
-        setPath(): void;
-        remove(): void;
-        moveEndPoint(point: any): void;
-    }
-}
-
 declare module 'codenodes/nodevalue' {
     import { Node } from "codenodes/node";
     import { NodeConnector } from "codenodes/nodeconnector";
@@ -232,6 +193,34 @@ declare module 'codenodes/nodevalue' {
         remove(): void;
         updateConectorPosition(): void;
         getValue(): any;
+    }
+}
+
+declare module 'codenodes/nodeconnector' {
+    import { Node } from "codenodes/node";
+    import { Point } from "codenodes/point";
+    import { NodeValue } from "codenodes/nodevalue";
+    export class NodeConnector {
+        end1: Node;
+        end2: NodeValue;
+        sp: Point;
+        ep: Point;
+        path: SVGPathElement;
+        constructor(sp: Point, node: Node);
+        setPath(): void;
+        remove(): void;
+        moveEndPoint(point: any): void;
+    }
+}
+
+declare module 'codenodes/interfaces/ICodeNodesValueSchema' {
+    export interface ICodeNodesValueSchema {
+        id: number;
+        name: string;
+        type: string;
+        mode: string;
+        options: any;
+        multiple: boolean;
     }
 }
 

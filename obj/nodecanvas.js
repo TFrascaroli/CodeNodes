@@ -254,5 +254,3 @@ var NodeCanvas = (function () {
     return NodeCanvas;
 }());
 exports.NodeCanvas = NodeCanvas;
-
-//# sourceMappingURL=nodecanvas.js.map

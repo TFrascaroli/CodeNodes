@@ -1884,9 +1884,6 @@ function requestTimeout(timeout) {
 
 },{}],8:[function(require,module,exports){
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
 var nodecanvas_1 = require("./nodecanvas");
 var menu_1 = require("./menu");
@@ -2043,16 +2040,8 @@ var CodeNodes = (function () {
     return CodeNodes;
 }());
 exports.CodeNodes = CodeNodes;
-__export(require("./nodecanvas"));
-__export(require("./node"));
-__export(require("./menu"));
-__export(require("./point"));
-__export(require("./nodeconnector"));
-__export(require("./nodevalue"));
 
-
-
-},{"./menu":9,"./node":10,"./nodecanvas":11,"./nodeconnector":12,"./nodevalue":13,"./point":14}],9:[function(require,module,exports){
+},{"./menu":9,"./nodecanvas":11}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
@@ -2197,8 +2186,6 @@ var CodeNodesMenu = (function () {
     return CodeNodesMenu;
 }());
 exports.CodeNodesMenu = CodeNodesMenu;
-
-
 
 },{}],10:[function(require,module,exports){
 "use strict";
@@ -2437,8 +2424,6 @@ var Node = (function () {
     return Node;
 }());
 exports.Node = Node;
-
-
 
 },{"./nodevalue":13}],11:[function(require,module,exports){
 "use strict";
@@ -2698,8 +2683,6 @@ var NodeCanvas = (function () {
 }());
 exports.NodeCanvas = NodeCanvas;
 
-
-
 },{"./node":10,"./nodeconnector":12,"svg-pan-zoom":1}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2749,8 +2732,6 @@ var NodeConnector = (function () {
     return NodeConnector;
 }());
 exports.NodeConnector = NodeConnector;
-
-
 
 },{}],13:[function(require,module,exports){
 "use strict";
@@ -2961,22 +2942,6 @@ var NodeValue = (function () {
     return NodeValue;
 }());
 exports.NodeValue = NodeValue;
-
-
-
-},{}],14:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Point = (function () {
-    function Point(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    return Point;
-}());
-exports.Point = Point;
-
-
 
 },{}]},{},[8])(8)
 });

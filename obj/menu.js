@@ -142,5 +142,3 @@ var CodeNodesMenu = (function () {
     return CodeNodesMenu;
 }());
 exports.CodeNodesMenu = CodeNodesMenu;
-
-//# sourceMappingURL=menu.js.map

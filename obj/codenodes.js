@@ -1,7 +1,4 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
 var nodecanvas_1 = require("./nodecanvas");
 var menu_1 = require("./menu");
@@ -158,11 +155,3 @@ var CodeNodes = (function () {
     return CodeNodes;
 }());
 exports.CodeNodes = CodeNodes;
-__export(require("./nodecanvas"));
-__export(require("./node"));
-__export(require("./menu"));
-__export(require("./point"));
-__export(require("./nodeconnector"));
-__export(require("./nodevalue"));
-
-//# sourceMappingURL=codenodes.js.map
