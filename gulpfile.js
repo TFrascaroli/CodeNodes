@@ -21,6 +21,11 @@ var browserify = require("browserify"),
 var tsProject = ts.createProject("tsconfig.json");
 var tsTestProject = ts.createProject("tsconfig.json");
 
+// gulp.task('copy-defs', function () {
+//     gulp.src('./node_modules/svg-pan-zoom/dist/svg-pan-zoom.d.ts')
+//         .pipe(gulp.dest('./dist/'));
+// });
+
 gulp.task("build-app", function() {
     return gulp.src([
             "src/**/**.ts"
@@ -28,7 +33,7 @@ gulp.task("build-app", function() {
         .pipe(tsProject()).pipe(gulp.dest('./obj/'));
 });
 
-gulp.task('definitions', function(done) {
+gulp.task('definitions', ['build-app'], function(done) {
     dts({
         name: 'codenodes',
         baseDir: 'obj/',
@@ -106,4 +111,4 @@ gulp.task('watch', function() {
 });
 
 // Default Task
-gulp.task('default', ["lint", "definitions", "bundle", "less"]);
+gulp.task('default', ["lint", "bundle", "less"]);

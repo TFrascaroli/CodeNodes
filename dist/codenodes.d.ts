@@ -27,6 +27,7 @@ declare module 'codenodes' {
 declare module 'codenodes/nodecanvas' {
     import { Point } from "codenodes/point";
     import { Node } from "codenodes/node";
+	import * as SvgPanZoom from "svg-pan-zoom";
     import { INodeArguments } from "codenodes/interfaces/INodeArguments";
     import { INodeModel } from "codenodes/interfaces/INodeModel";
     export class NodeCanvas {
@@ -100,7 +101,7 @@ declare module 'codenodes/node' {
 }
 
 declare module 'codenodes/menu' {
-    import { CodeNodes } from "codenodes/codenodes";
+    import { CodeNodes } from "codenodes";
     export class CodeNodesMenu {
         g: SVGGElement;
         constructor(main: CodeNodes);
