@@ -15,24 +15,31 @@ var browserify = require("browserify"),
     rename = require('gulp-rename'),
     merge = require('merge-stream'),
     cssmin = require('gulp-cssmin'),
+    dts = require('dts-bundle').bundle,
     util = require('gulp-util');
 
 var tsProject = ts.createProject("tsconfig.json");
 var tsTestProject = ts.createProject("tsconfig.json");
 
 gulp.task("build-app", function() {
-    var tspipe = gulp.src([
+    return gulp.src([
             "src/**/**.ts",
             "typings/main.d.ts/"
         ])
         .pipe(sourcemaps.init())
-        .pipe(tsProject());
-
-    return merge([
-        tspipe.dts.pipe(gulp.dest('./types/')),
-        tspipe.js.pipe(sourcemaps.write('.')).pipe(gulp.dest('./obj/'))
-    ]);
+        .pipe(tsProject()).pipe(sourcemaps.write('.')).pipe(gulp.dest('./obj/'));
 });
+
+gulp.task('definitions', function(done) {
+    dts({
+        name: 'codenodes',
+        baseDir: 'obj/',
+        main: './obj/codenodes.d.ts',
+        out: '../types/codenodes.d.ts'
+    });
+    done();
+});
+
 
 // Lint Task
 gulp.task("lint", function() {
@@ -99,4 +106,4 @@ gulp.task('watch', function() {
 });
 
 // Default Task
-gulp.task('default', ["lint", "bundle", "less", "watch"]);
+gulp.task('default', ["lint", "definitions", "bundle", "less"]);
