@@ -1,4 +1,5 @@
 import {NodeCanvas} from "./nodecanvas";
+import {Node} from "./node";
 import {CodeNodesMenu} from "./menu";
 import {Point} from "./point";
 import {ICodeNodesType} from "./interfaces/ICodeNodesType";
@@ -43,6 +44,10 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
     center () {
         this.canvas.center();
     };
+
+    clear () {
+        this.canvas.clear();
+    }
 
     findType (tID: string): ICodeNodesType {
         let i = 0, len = this.types.length;
@@ -150,5 +155,9 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
         let self = this;
         this.canvas.setTransform(model.transform);
         self.canvas.parse(model.nodes);
+    }
+
+    getOfType(type: string): Node[] {
+        return this.canvas.getOfType(type);
     }
 }

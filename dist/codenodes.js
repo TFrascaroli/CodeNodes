@@ -1919,6 +1919,9 @@ var CodeNodes = (function () {
         this.canvas.center();
     };
     ;
+    CodeNodes.prototype.clear = function () {
+        this.canvas.clear();
+    };
     CodeNodes.prototype.findType = function (tID) {
         var i = 0, len = this.types.length;
         for (; i < len; i++) {
@@ -2030,6 +2033,9 @@ var CodeNodes = (function () {
         var self = this;
         this.canvas.setTransform(model.transform);
         self.canvas.parse(model.nodes);
+    };
+    CodeNodes.prototype.getOfType = function (type) {
+        return this.canvas.getOfType(type);
     };
     return CodeNodes;
 }());
@@ -2158,6 +2164,11 @@ var CodeNodesMenu = (function () {
                     break;
                 case 3:
                     t.textContent = "Reset";
+                    rect.addEventListener("click", function (evt) {
+                        main.clear();
+                        self.close();
+                        evt.stopPropagation();
+                    });
                     break;
             }
         };

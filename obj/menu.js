@@ -118,6 +118,11 @@ var CodeNodesMenu = (function () {
                     break;
                 case 3:
                     t.textContent = "Reset";
+                    rect.addEventListener("click", function (evt) {
+                        main.clear();
+                        self.close();
+                        evt.stopPropagation();
+                    });
                     break;
             }
         };
