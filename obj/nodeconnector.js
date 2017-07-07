@@ -34,7 +34,7 @@ var NodeConnector = (function () {
             this.end2.inputConnector = null;
         }
         if (this.path) {
-            this.path.parentNode.removeChild(this.path);
+            this.path.remove();
             this.path = null;
         }
     };

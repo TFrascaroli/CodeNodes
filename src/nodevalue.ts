@@ -15,6 +15,7 @@ export class NodeValue {
     public __internalSetValue: Function;
     private svgEntity: SVGGElement;
     public options: ICodeNodesValueSchema;
+    private popup: HTMLDivElement = null;
 
 
 
@@ -98,6 +99,7 @@ export class NodeValue {
                         btn.textContent = "*Edit";
                         let popup = document.createElement("div");
                         popup.classList.add("codenodes-popup");
+                        this.popup = popup;
                         let popupLayer = document.createElement("div");
                         popupLayer.classList.add("layer");
                         let popupContent = document.createElement("div");
@@ -168,8 +170,8 @@ export class NodeValue {
 				type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
-				this.__internalGetValue = function () {
-					if (self.inputConnector) {
+				this.__internalGetValue = function (serializing) {
+					if (!serializing && self.inputConnector) {
                         let built = self.inputConnector.end1.build();
                         if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
                             return [built];
@@ -202,6 +204,19 @@ export class NodeValue {
             y: this.parentNode.position.y + this.gOffset.y + 16
         };
     };
+
+    remove() {
+        if (this.inputConnector) {
+            this.inputConnector.remove();
+            this.inputConnector = null;
+        }
+        this.svgEntity.remove();
+        this.svgEntity = null;
+        if (this.popup) {
+            document.body.removeChild(this.popup);
+        }
+        this.parentNode = null;
+    }
 
     updateConectorPosition() {
         if (this.inputConnector) {

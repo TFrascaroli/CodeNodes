@@ -2,5 +2,10 @@ import {INodeModel} from "./INodeModel";
 
 export interface ICodeNodesModel {
     nodes: INodeModel[],
-    transform: string
+    transform: {
+        pan: {
+            x: number, y: number
+        },
+        zoom: number
+    }
 }

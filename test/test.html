@@ -13,14 +13,17 @@
                 description: "Value for a specific column and row",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column definition",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Parent row",
                     type: "Row",
                     mode: "in"
                 }, {
+                    id: 2,
                     name: "Value type",
                     type: "select", // Opcions amb els tipus de dades admesses
                     options: [{
@@ -40,6 +43,7 @@
                 description: "Row data for SledgeHammer",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Values",
                     type: "value",
                     mode: "in",
@@ -51,15 +55,19 @@
                 description: "Column definition for a table",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "ColumnID",
                     type: "text",
                 }, {
+                    id: 1,
                     name: "Heading",
                     type: "text",
                 }, {
+                    id: 2,
                     name: "Color",
                     type: "color",
                 }, {
+                    id: 3,
                     name: "Value type",
                     type: "select",
                     options: [{
@@ -73,9 +81,11 @@
                         save: "string"
                     }]
                 }, {
+                    id: 4,
                     name: "Format",
                     type: "text",
                 }, {
+                    id: 5,
                     name: "Column width",
                     type: "text",
                 }]
@@ -85,17 +95,21 @@
                 description: "Table model, requiring rows and columns",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Name",
                     type: "text",
                 }, {
+                    id: 1,
                     name: "Description",
                     type: "popup",
                 }, {
+                    id: 2,
                     name: "Rows",
                     type: "row",
                     mode: "in",
                     multiple: true
                 }, {
+                    id: 3,
                     name: "Columns",
                     type: "colDef",
                     mode: "in",
@@ -107,6 +121,7 @@
                 description: "Collection of tables to use on the operators",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Tables",
                     type: "table",
                     mode: "in",
@@ -118,6 +133,7 @@
                 description: "Middle-way for a column definition to go inside some operators",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column definition",
                     type: "colDef",
                     mode: "in"
@@ -129,10 +145,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table Collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "SumOptions",
                     mode: "in"
@@ -144,10 +162,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "SumDateOptions",
                     mode: "in"
@@ -159,10 +179,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "MulOptions",
                     mode: "in"
@@ -174,10 +196,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "Div2ColOptions",
                     mode: "in"
@@ -189,10 +213,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator option",
                     type: "DivColScalarOptions",
                     mode: "in"
@@ -204,10 +230,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator option",
                     type: "DivScalarColOptions",
                     mode: "in"
@@ -219,10 +247,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator option",
                     type: "Sub2ColOptions",
                     mode: "in"
@@ -234,10 +264,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator option",
                     type: "SubColScalarOptions",
                     mode: "in"
@@ -249,10 +281,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator option",
                     type: "SubScalarColOptions",
                     mode: "in"
@@ -263,18 +297,22 @@
                 description: "Provides the options for the sum operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
+                    id: 1,
                     name: "Scalar",
                     type: "number",
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -284,18 +322,22 @@
                 description: "Provides the options for the sum operator for dates",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
+                    id: 1,
                     name: "Scalar",
                     type: "number",
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -305,18 +347,22 @@
                 description: "Provides the options for the multiplication operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
+                    id: 1,
                     name: "Scalar",
                     type: "number",
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -326,18 +372,22 @@
                 description: "Provides the options for the division operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Dividend",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Divisor",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -347,17 +397,21 @@
                 description: "Provides the options for the division operator of a column by a scalar",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Dividend",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Divisor",
                     type: "number",
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -367,17 +421,21 @@
                 description: "Provides the options for the division operator of a scalar by a column",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Dividend",
                     type: "number"
                 }, {
+                    id: 1,
                     name: "Divisor",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -387,18 +445,22 @@
                 description: "Provides the options for the subtraction operator of two columns",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "First column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Second column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -408,17 +470,21 @@
                 description: "Provides the options for the subtraction operator of a scalar from a column",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "First column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Scalar",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -428,17 +494,21 @@
                 description: "Provides the options for the subtraction operator of a column from a scalar",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "First column",
                     type: "number"
                 }, {
+                    id: 1,
                     name: "Scalar",
                     type: "colRefReference",
                     mode: "in"
                 }, {
+                    id: 2,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 3,
                     name: "Resulting table",
                     type: "number",
                 }]
@@ -450,10 +520,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "SumaColOptions",
                     mode: "in"
@@ -465,10 +537,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "SortOptions",
                     mode: "in"
@@ -480,10 +554,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "MinOptions",
                     mode: "in"
@@ -495,10 +571,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "MaxOptions",
                     mode: "in"
@@ -510,10 +588,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "MedianOptions",
                     mode: "in"
@@ -525,10 +605,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "AverageOptions",
                     mode: "in"
@@ -540,10 +622,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "LogicalOptions",
                     mode: "in"
@@ -555,10 +639,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "FilterOptions",
                     mode: "in"
@@ -570,10 +656,12 @@
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Operator options",
                     type: "BooleanOptions",
                     mode: "in"
@@ -584,10 +672,12 @@
                 description: "Options for the single column sum operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }]
@@ -597,10 +687,12 @@
                 description: "Options for the sort operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column to order",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Direction",
                     type: "select",
                     options: [{
@@ -620,10 +712,12 @@
                 description: "Options for the minimum operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }]
@@ -633,10 +727,12 @@
                 description: "Options for the maximum operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }]
@@ -646,10 +742,12 @@
                 description: "Options for the median operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }]
@@ -659,10 +757,12 @@
                 description: "Options for the average operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }]
@@ -672,13 +772,16 @@
                 description: "Options for the logical operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                 }, {
+                    id: 2,
                     name: "Condition",
                     type: "select",
 
@@ -708,10 +811,12 @@
                         save: 7
                     }]
                 }, {
+                    id: 3,
                     name: "Value",
                     type: "colValue",
                     mode: "in"
                 }, {
+                    id: 4,
                     name: "Logical operator",
                     type: "select",
                     options: [{
@@ -722,9 +827,11 @@
                         save: 1
                     }]
                 }, {
+                    id: 5,
                     name: "Result if true",
                     type: "text"
                 }, {
+                    id: 6,
                     name: "Result if false",
                     type: "text"
                 }]
@@ -734,13 +841,16 @@
                 description: "Options for the filter operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Condition",
                     type: "select",
                     options: [{
@@ -769,6 +879,7 @@
                         save: 7
                     }]
                 }, {
+                    id: 3,
                     name: "Value",
                     type: "colValue",
                     mode: "in"
@@ -779,13 +890,16 @@
                 description: "Options for the boolean operator",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Condition",
                     type: "select",
                     options: [{
@@ -814,16 +928,20 @@
                         save: 7
                     }]
                 }, {
+                    id: 3,
                     name: "Value",
                     type: "colValue",
                     mode: "in"
                 }, {
+                    id: 4,
                     name: "Result if true",
                     type: "text"
                 }, {
+                    id: 5,
                     name: "Result if false",
                     type: "text"
                 }, {
+                    id: 6,
                     name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
@@ -834,16 +952,20 @@
                 description: "Represents data in a table format",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Width",
                     type: "number"
                 }, {
+                    id: 3,
                     name: "Height",
                     type: "number"
                 }]
@@ -853,19 +975,24 @@
                 description: "Represents data in a bar graph format",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Width",
                     type: "number"
                 }, {
+                    id: 3,
                     name: "Height",
                     type: "number"
                 }, {
+                    id: 4,
                     name: "Graph options",
                     type: "BarGraphOptions",
                     mode: "in"
@@ -876,19 +1003,24 @@
                 description: "Represents data in a pie graph format",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Width",
                     type: "number"
                 }, {
+                    id: 3,
                     name: "Height",
                     type: "number"
                 }, {
+                    id: 4,
                     name: "Graph options",
                     type: "PieGraphOptions",
                     mode: "in"
@@ -899,19 +1031,24 @@
                 description: "Represents data by compiling a template with the data provided",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 2,
                     name: "Width",
                     type: "number"
                 }, {
+                    id: 3,
                     name: "Height",
                     type: "number"
                 }, {
+                    id: 4,
                     name: "Graph options",
                     type: "TemplateOptions",
                     mode: "in"
@@ -922,18 +1059,22 @@
                 description: "Provides the options for the bar graph representation",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "X Axis column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Y Axis colum(s)",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
+                    id: 2,
                     name: "Legend?",
                     type: "checkbox"
                 }, {
+                    id: 3,
                     name: "orientation",
                     type: "select",
                     option: [{
@@ -944,12 +1085,15 @@
                         save: "Vertical"
                     }]
                 }, {
+                    id: 4,
                     name: "Grouped?",
                     type: "checkbox"
                 }, {
+                    id: 5,
                     name: "Piled?",
                     type: "checkbox"
                 }, {
+                    id: 6,
                     name: "Table index",
                     type: "number"
                 }]
@@ -959,19 +1103,24 @@
                 description: "Provides the options for the pie graph representation",
                 builder: function() {},
                 schema: [{
+                    id: 0,
                     name: "X Axis column",
                     type: "colDef",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Legend?",
                     type: "checkbox"
                 }, {
+                    id: 2,
                     name: "Table index",
                     type: "number"
                 }, {
+                    id: 3,
                     name: "Radius",
                     type: "number"
                 }, {
+                    id: 4,
                     name: "Pie type",
                     type: "text",
                     options: [{
@@ -982,99 +1131,68 @@
                         save: "donut"
                     }]
                 }]
-            },
-            TemplateOptions: {
-                id: "PieGraphOptions",
-                name: "Pie graph options",
-                description: "Provides the options for the pie graph representation",
+            }, {
+                id: "TemplateOptions",
+                name: "Template representation options",
+                description: "Provides the options for the templated representation",
                 builder: function() {},
                 schema: [{
-                    name: "template",
+                    id: 0,
+                    name: "Template",
                     type: "select",
                     options: [{
-                        show: "Fitxa Personal",
+                        show: "Personal file",
                         save: "personalExpedient"
                     }, {
-                        show: "Galeria d'imatges",
+                        show: "Image gallery",
                         save: "photoGallery"
                     }]
                 }, {
+                    id: 1,
                     name: "Params",
                     type: "popup",
                 }]
-            },
-            first: {
-                builder: function() {
-                    return "hola";
-                },
-                schema: [{
-                    name: "primer valor",
-                    type: "text",
-                }, {
-                    name: "segundo valor",
-                    type: "range",
-                    options: [100, 10]
-                }, {
-                    name: "tercer valor",
-                    type: "number",
-                }, {
-                    name: "cuarto valor",
-                    type: "number",
-                    mode: "in"
-                }, {
-                    name: "solo en este",
-                    type: "first",
-                    mode: "in"
-                }, {
-                    name: "fecha",
-                    type: "date",
-                }, {
-                    name: "textillo",
-                    type: "popup",
-                }, {
-                    name: "cars",
-                    type: "select",
-                    options: [{
-                        show: "Seat",
-                        save: 0
-                    }, {
-                        show: "Peugeot",
-                        save: 1
-                    }, {
-                        show: "Renault",
-                        save: 2
-                    }]
-                }]
-            },
-            DataSource: {
+            }, {
+                id: "DataSource",
+                name: "Mockup of initial datasource",
+                description: " - ",
                 builder: function() {},
                 outputType: "table",
                 schema: [{
+                    id: 0,
                     name: "JSON",
                     type: "popup",
                 }]
-            },
-            GetTable: {
+            }, {
+                id: "GetTable",
+                name: "Get table",
+                description: "Retrieve a table from a table collection",
                 builder: function() {},
                 outputType: "table",
                 schema: [{
-                    name: "Table Collection",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Table index",
                     type: "number",
                     model: "edit"
                 }]
-            },
-            GetColDef: {
+            }, {
+                id: "GetColDef",
+                name: "Get column",
+                description: "Retrieve a column from a table",
                 builder: function() {},
                 outputType: "colDef",
                 schema: [{
+                    id: 0,
                     name: "Table",
                     type: "table",
                     mode: "in"
                 }, {
+                    id: 1,
                     name: "Column ID (name)",
                     type: "text",
                 }]

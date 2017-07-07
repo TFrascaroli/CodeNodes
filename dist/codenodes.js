@@ -1901,7 +1901,9 @@ var CodeNodes = (function () {
         this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
-        this.types = types;
+        this.types = types.sort(function (a, b) {
+            return b.name.localeCompare(a.name);
+        }).reverse();
         this.menu = new menu_1.CodeNodesMenu(this);
         this.canvas.ondblclick = function (p, rawP) {
             self.menuPoint = p;
@@ -1925,6 +1927,15 @@ var CodeNodes = (function () {
     CodeNodes.prototype.center = function () {
         this.canvas.center();
     };
+    ;
+    CodeNodes.prototype.findType = function (tID) {
+        var i = 0, len = this.types.length;
+        for (; i < len; i++) {
+            if (this.types[i].id === tID)
+                return this.types[i];
+        }
+        return null;
+    };
     CodeNodes.prototype.collectionTypeOf = function (t) {
         return {
             id: t.id,
@@ -1937,7 +1948,7 @@ var CodeNodes = (function () {
             outputMultiple: true,
             schema: [
                 {
-                    name: " - " + t,
+                    name: " - " + t.name,
                     type: t.id,
                     mode: "in",
                     options: null,
@@ -1947,10 +1958,11 @@ var CodeNodes = (function () {
         };
     };
     CodeNodes.prototype.addNode = function (name, type) {
-        var t = this.types[type];
+        var t = this.findType(type);
         if (t) {
             var outputType = t.outputType || type;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 this.canvas.addNode({
@@ -1990,10 +2002,11 @@ var CodeNodes = (function () {
     };
     ;
     CodeNodes.prototype.addCollection = function (name, ofType) {
-        var t = this.types[ofType];
+        var t = this.findType(ofType);
         if (t) {
             var outputType = t.outputType || ofType;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
@@ -2021,6 +2034,12 @@ var CodeNodes = (function () {
             transform: this.canvas.getTransform()
         };
     };
+    ;
+    CodeNodes.prototype.parse = function (model) {
+        var self = this;
+        this.canvas.setTransform(model.transform);
+        self.canvas.parse(model.nodes);
+    };
     return CodeNodes;
 }());
 exports.CodeNodes = CodeNodes;
@@ -2038,6 +2057,7 @@ var CodeNodesMenu = (function () {
         this.main = main;
         this.g = document.createElementNS(namespace, "g");
         this.g.classList.add("menu-g");
+        var selectedValue = null;
         var popup = document.createElement("div");
         popup.classList.add("codenodes-menu-popup");
         this.popup = popup;
@@ -2049,12 +2069,14 @@ var CodeNodesMenu = (function () {
         popupWraper.classList.add("wraper");
         var popupTitle = document.createElement("div");
         popupTitle.classList.add("title");
-        var entitySelector = document.createElement("select");
+        var entitySelector = document.createElement("div");
+        entitySelector.classList.add("select");
         var entitySelectorWrap = document.createElement("div");
         entitySelectorWrap.classList.add("entity-selector");
         var entityName = document.createElement("input");
+        entityName.type = "text";
         var entityNameWrap = document.createElement("div");
-        entitySelectorWrap.classList.add("entity-name");
+        entityNameWrap.classList.add("entity-name");
         var popupOK = document.createElement("div");
         popupOK.classList.add("ok");
         popup.appendChild(popupLayer);
@@ -2070,21 +2092,33 @@ var CodeNodesMenu = (function () {
             self.close();
             switch (addMode) {
                 case "node":
-                    main.addNode(entityName.value, entitySelector.value);
+                    main.addNode(entityName.value, selectedValue);
                     break;
                 case "collection":
-                    main.addCollection(entityName.value, entitySelector.value);
+                    main.addCollection(entityName.value, selectedValue);
                     break;
             }
         });
         function fillEntitySelector() {
             entitySelector.innerHTML = "";
-            entitySelector.value = "";
-            var types = Object.keys(self.main.types).filter(function (p) { return self.main.types.hasOwnProperty(p); });
-            types.forEach(function (t) {
-                var opt = document.createElement("option");
-                opt.textContent = t;
-                opt.value = t;
+            self.main.types.forEach(function (t) {
+                var opt = document.createElement("div");
+                opt.classList.add("option");
+                var name = document.createElement("div");
+                var desc = document.createElement("div");
+                name.classList.add("name");
+                desc.classList.add("desc");
+                name.textContent = t.name;
+                desc.textContent = t.description;
+                opt.appendChild(name);
+                opt.appendChild(desc);
+                opt.addEventListener("click", function () {
+                    [].forEach.call(entitySelector.querySelectorAll(".option"), function (o) {
+                        o.classList.remove("selected");
+                    });
+                    opt.classList.add("selected");
+                    selectedValue = t.id;
+                });
                 entitySelector.appendChild(opt);
             });
         }
@@ -2186,6 +2220,7 @@ var Node = (function () {
     Node.prototype.setValueDefaults = function (v) {
         v.options = v.options || [];
         v.multiple = v.multiple || false;
+        v.mode = v.mode || "edit";
     };
     Node.prototype.collectionValueOf = function (v) {
         return {
@@ -2315,7 +2350,7 @@ var Node = (function () {
             values: this.values.map(function (v) {
                 return {
                     valueID: v.options.id,
-                    value: v.__internalGetValue()
+                    value: v.__internalGetValue(true)
                 };
             }),
             outputConnectors: this.outputConnectors.map(function (c) {
@@ -2325,6 +2360,8 @@ var Node = (function () {
                 };
             })
         };
+        model.arguments.x = this.position.x;
+        model.arguments.y = this.position.y;
         return model;
     };
     ;
@@ -2372,11 +2409,9 @@ var Node = (function () {
     Node.prototype.remove = function () {
         var self = this;
         this.values.forEach(function (val) {
-            if (val.inputConnector) {
-                val.inputConnector.remove();
-            }
-            ;
+            val.remove();
         });
+        this.values = null;
         [].concat(this.outputConnectors).forEach(function (con) {
             con.remove();
         });
@@ -2453,11 +2488,16 @@ var NodeCanvas = (function () {
     };
     ;
     NodeCanvas.prototype.getTransform = function () {
-        return this.g.getAttribute("transform");
+        var ctm = this.g.getCTM();
+        return {
+            pan: { x: ctm.e, y: ctm.f },
+            zoom: ctm.a
+        };
     };
     ;
     NodeCanvas.prototype.setTransform = function (transform) {
-        this.g.setAttribute("transform", transform);
+        this.zoomingSvg.zoom(transform.zoom);
+        this.zoomingSvg.pan(transform.pan);
     };
     NodeCanvas.prototype.convertCoords = function (o) {
         var x = o.x, y = o.y;
@@ -2507,19 +2547,20 @@ var NodeCanvas = (function () {
             });
             if (candidates.length > 0) {
                 var candidateDot = candidates[0].dot;
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
+                    return;
+                }
+                if (candidateDot.parentValue.options.type !== "any" && (candidateDot.parentValue.options.type !== cc.end1.options.type.outputType ||
+                    (!candidateDot.parentValue.options.multiple && cc.end1.options.type.outputMultiple))) {
+                    cc.remove();
+                    return;
+                }
                 if (candidateDot.parentValue.inputConnector) {
                     candidateDot.parentValue.inputConnector.remove();
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end1 === candidateDot.parentValue.parentNode) {
-                    cc.remove();
-                    return;
-                }
-                if (cc.end2.options.type !== "any" && cc.end2.options.type !== cc.end1.options.type.outputType) {
-                    cc.remove();
-                    return;
-                }
                 if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
@@ -2536,8 +2577,8 @@ var NodeCanvas = (function () {
             self.ctm = self.g.getCTM().inverse();
             self.offset = self.svg.getBoundingClientRect();
             var p1 = {
-                x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
-                y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
+                x: entity.position.x + parseInt(entity.outputOffset.x.toString()),
+                y: entity.position.y + parseInt(entity.outputOffset.y.toString())
             };
             self.currentConnector = new nodeconnector_1.NodeConnector(p1, entity);
             entity.outputConnectors.push(self.currentConnector);
@@ -2607,19 +2648,28 @@ var NodeCanvas = (function () {
             var n = self.findNode(nm.arguments.id);
             nm.outputConnectors.forEach(function (cn) {
                 var end2 = self.findNode(cn.nodeTo);
+                var p1 = {
+                    x: n.position.x + parseInt(n.outputOffset.x.toString()),
+                    y: n.position.y + parseInt(n.outputOffset.y.toString())
+                };
+                var conn = new nodeconnector_1.NodeConnector(p1, n);
+                n.outputConnectors.push(conn);
+                self.paths.appendChild(conn.path);
                 if (end2.options.isCollection) {
                     end2.cloneLastValue();
                 }
-                end2.findValue(cn.valueTo).inputConnector;
+                var val = end2.findValue(cn.valueTo);
+                val.inputConnector = conn;
+                conn.end2 = val;
+                val.updateConectorPosition();
             });
         });
     };
     NodeCanvas.prototype.clear = function () {
-        //Alert the user about the action being irreversible
-        var nds = [].concat(this.nodes);
-        nds.forEach(function (node) {
+        [].concat(this.nodes).forEach(function (node) {
             node.remove();
         });
+        this.paths.innerHTML = "";
     };
     ;
     NodeCanvas.prototype.getTerminalNodes = function () {
@@ -2671,7 +2721,7 @@ var NodeConnector = (function () {
             this.end2.inputConnector = null;
         }
         if (this.path) {
-            this.path.parentNode.removeChild(this.path);
+            this.path.remove();
             this.path = null;
         }
     };
@@ -2693,6 +2743,7 @@ var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
     function NodeValue(opts, node) {
+        this.popup = null;
         this.options = opts;
         this.inputConnector = null;
         this.__internalGetValue = null;
@@ -2768,6 +2819,7 @@ var NodeValue = (function () {
                         btn.textContent = "*Edit";
                         var popup_1 = document.createElement("div");
                         popup_1.classList.add("codenodes-popup");
+                        this.popup = popup_1;
                         var popupLayer = document.createElement("div");
                         popupLayer.classList.add("layer");
                         var popupContent = document.createElement("div");
@@ -2832,8 +2884,8 @@ var NodeValue = (function () {
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
-                this.__internalGetValue = function () {
-                    if (self.inputConnector) {
+                this.__internalGetValue = function (serializing) {
+                    if (!serializing && self.inputConnector) {
                         var built = self.inputConnector.end1.build();
                         if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
                             return [built];
@@ -2866,6 +2918,18 @@ var NodeValue = (function () {
         };
     };
     ;
+    NodeValue.prototype.remove = function () {
+        if (this.inputConnector) {
+            this.inputConnector.remove();
+            this.inputConnector = null;
+        }
+        this.svgEntity.remove();
+        this.svgEntity = null;
+        if (this.popup) {
+            document.body.removeChild(this.popup);
+        }
+        this.parentNode = null;
+    };
     NodeValue.prototype.updateConectorPosition = function () {
         if (this.inputConnector) {
             this.inputConnector.ep = this.getDotPosition();

@@ -73,11 +73,16 @@ export class NodeCanvas {
             });
         };
     };
-    getTransform(): string {
-        return this.g.getAttribute("transform");
+    getTransform() {
+        let ctm = this.g.getCTM();
+        return {
+            pan: {x: ctm.e, y: ctm.f},
+            zoom: ctm.a
+        };
     };
-    setTransform(transform: string) {
-        this.g.setAttribute("transform", transform);
+    setTransform(transform: {pan:{x: number, y: number}, zoom: number}) {
+        this.zoomingSvg.zoom(transform.zoom);
+        this.zoomingSvg.pan(transform.pan);
     }
     convertCoords(o: Point) {
         var x = o.x,
@@ -132,19 +137,21 @@ export class NodeCanvas {
             });
             if (candidates.length > 0) {
                 let candidateDot = candidates[0].dot;
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
+                    return;
+                }
+                if (candidateDot.parentValue.options.type !== "any" && (candidateDot.parentValue.options.type !== cc.end1.options.type.outputType ||
+                    (!candidateDot.parentValue.options.multiple && cc.end1.options.type.outputMultiple)
+                )) {
+                    cc.remove();
+                    return;
+                }
                 if (candidateDot.parentValue.inputConnector) {
                     candidateDot.parentValue.inputConnector.remove();
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end1 === candidateDot.parentValue.parentNode) {
-                    cc.remove();
-                    return;
-                }
-                if (cc.end2.options.type !== "any" && cc.end2.options.type !== cc.end1.options.type.outputType) {
-                    cc.remove();
-                    return;
-                }
                 if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
@@ -235,29 +242,30 @@ export class NodeCanvas {
             nm.outputConnectors.forEach(cn => {
                 let end2 = self.findNode(cn.nodeTo);
                 let p1 = {
-                    x: end2.position.x + parseInt(end2.outputOffset.x.toString()),
-                    y: end2.position.y + parseInt(end2.outputOffset.y.toString())
+                    x: n.position.x + parseInt(n.outputOffset.x.toString()),
+                    y: n.position.y + parseInt(n.outputOffset.y.toString())
                 }
-                let conn = new NodeConnector(p1, end2);
-                end2.outputConnectors.push(self.currentConnector);
-                self.paths.appendChild(self.currentConnector.path);
+                let conn = new NodeConnector(p1, n);
+                n.outputConnectors.push(conn);
+                self.paths.appendChild(conn.path);
+
 
                 if (end2.options.isCollection) {
                     end2.cloneLastValue();
                 }
                 let val = end2.findValue(cn.valueTo);
                 val.inputConnector = conn;
+                conn.end2 = val;
                 val.updateConectorPosition();
             });
         });
     }
 
     clear() {
-		//Alert the user about the action being irreversible
-		var nds = [].concat(this.nodes);
-		nds.forEach(function (node) {
+		[].concat(this.nodes).forEach(function (node) {
 			node.remove();
 		});
+        this.paths.innerHTML = "";
     };
 
     getTerminalNodes () {

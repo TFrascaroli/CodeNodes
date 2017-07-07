@@ -28,6 +28,7 @@ var Node = (function () {
     Node.prototype.setValueDefaults = function (v) {
         v.options = v.options || [];
         v.multiple = v.multiple || false;
+        v.mode = v.mode || "edit";
     };
     Node.prototype.collectionValueOf = function (v) {
         return {
@@ -157,7 +158,7 @@ var Node = (function () {
             values: this.values.map(function (v) {
                 return {
                     valueID: v.options.id,
-                    value: v.__internalGetValue()
+                    value: v.__internalGetValue(true)
                 };
             }),
             outputConnectors: this.outputConnectors.map(function (c) {
@@ -167,6 +168,8 @@ var Node = (function () {
                 };
             })
         };
+        model.arguments.x = this.position.x;
+        model.arguments.y = this.position.y;
         return model;
     };
     ;
@@ -214,11 +217,9 @@ var Node = (function () {
     Node.prototype.remove = function () {
         var self = this;
         this.values.forEach(function (val) {
-            if (val.inputConnector) {
-                val.inputConnector.remove();
-            }
-            ;
+            val.remove();
         });
+        this.values = null;
         [].concat(this.outputConnectors).forEach(function (con) {
             con.remove();
         });

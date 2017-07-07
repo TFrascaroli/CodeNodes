@@ -7,7 +7,9 @@ var CodeNodes = (function () {
         this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
-        this.types = types;
+        this.types = types.sort(function (a, b) {
+            return b.name.localeCompare(a.name);
+        }).reverse();
         this.menu = new menu_1.CodeNodesMenu(this);
         this.canvas.ondblclick = function (p, rawP) {
             self.menuPoint = p;
@@ -31,6 +33,15 @@ var CodeNodes = (function () {
     CodeNodes.prototype.center = function () {
         this.canvas.center();
     };
+    ;
+    CodeNodes.prototype.findType = function (tID) {
+        var i = 0, len = this.types.length;
+        for (; i < len; i++) {
+            if (this.types[i].id === tID)
+                return this.types[i];
+        }
+        return null;
+    };
     CodeNodes.prototype.collectionTypeOf = function (t) {
         return {
             id: t.id,
@@ -43,7 +54,7 @@ var CodeNodes = (function () {
             outputMultiple: true,
             schema: [
                 {
-                    name: " - " + t,
+                    name: " - " + t.name,
                     type: t.id,
                     mode: "in",
                     options: null,
@@ -53,10 +64,11 @@ var CodeNodes = (function () {
         };
     };
     CodeNodes.prototype.addNode = function (name, type) {
-        var t = this.types[type];
+        var t = this.findType(type);
         if (t) {
             var outputType = t.outputType || type;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 this.canvas.addNode({
@@ -96,10 +108,11 @@ var CodeNodes = (function () {
     };
     ;
     CodeNodes.prototype.addCollection = function (name, ofType) {
-        var t = this.types[ofType];
+        var t = this.findType(ofType);
         if (t) {
             var outputType = t.outputType || ofType;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
@@ -126,6 +139,12 @@ var CodeNodes = (function () {
             nodes: this.canvas.serialize(),
             transform: this.canvas.getTransform()
         };
+    };
+    ;
+    CodeNodes.prototype.parse = function (model) {
+        var self = this;
+        this.canvas.setTransform(model.transform);
+        self.canvas.parse(model.nodes);
     };
     return CodeNodes;
 }());

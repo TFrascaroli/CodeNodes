@@ -17,7 +17,9 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
     constructor (types: ICodeNodesType[]) {
         let self = this;
         this.canvas = new NodeCanvas();
-        this.types = types;
+        this.types = types.sort((a, b) => {
+            return b.name.localeCompare(a.name);
+        }).reverse();
         this.menu = new CodeNodesMenu(this);
         this.canvas.ondblclick = function (p: Point, rawP: Point) {
             self.menuPoint = p;
@@ -40,6 +42,14 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
 
     center () {
         this.canvas.center();
+    };
+
+    findType (tID: string): ICodeNodesType {
+        let i = 0, len = this.types.length;
+        for(;i < len; i++) {
+            if (this.types[i].id === tID) return this.types[i];
+        }
+        return null;
     }
 
     private collectionTypeOf (t: ICodeNodesType): ICodeNodesType{
@@ -54,7 +64,7 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
             outputMultiple: true,
             schema: [
                 <ICodeNodesValueSchema>{
-                    name: " - " + t,
+                    name: " - " + t.name,
                     type: t.id,
                     mode: "in",
                     options: null,
@@ -65,10 +75,11 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
     }
 
     public addNode (name: string, type: string) {
-        let t: ICodeNodesType = this.types[type];
+        let t: ICodeNodesType = this.findType(type);
         if (t) {
             let outputType = t.outputType || type;
-            let ot: ICodeNodesType = this.types[outputType];
+            let ot: ICodeNodesType = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 let p = this.menuPoint || {x: 10, y: 10};
                 this.canvas.addNode({
@@ -103,10 +114,11 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
         // }); TODO: Arreglar això
     };
     public addCollection (name, ofType: string) {
-        let t: ICodeNodesType = this.types[ofType];
+        let t: ICodeNodesType = this.findType(ofType);
         if (t) {
             let outputType = t.outputType || ofType;
-            let ot: ICodeNodesType = this.types[outputType];
+            let ot: ICodeNodesType = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
 
                 let p = this.menuPoint || {x: 10, y: 10};
@@ -137,8 +149,6 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
     parse (model: ICodeNodesModel) {
         let self = this;
         this.canvas.setTransform(model.transform);
-        model.nodes.forEach(nm => {
-            self.canvas.parse(model.nodes);
-        });
+        self.canvas.parse(model.nodes);
     }
 }

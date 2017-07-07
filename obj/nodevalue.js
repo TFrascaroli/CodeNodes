@@ -4,6 +4,7 @@ var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
     function NodeValue(opts, node) {
+        this.popup = null;
         this.options = opts;
         this.inputConnector = null;
         this.__internalGetValue = null;
@@ -79,6 +80,7 @@ var NodeValue = (function () {
                         btn.textContent = "*Edit";
                         var popup_1 = document.createElement("div");
                         popup_1.classList.add("codenodes-popup");
+                        this.popup = popup_1;
                         var popupLayer = document.createElement("div");
                         popupLayer.classList.add("layer");
                         var popupContent = document.createElement("div");
@@ -143,8 +145,8 @@ var NodeValue = (function () {
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
-                this.__internalGetValue = function () {
-                    if (self.inputConnector) {
+                this.__internalGetValue = function (serializing) {
+                    if (!serializing && self.inputConnector) {
                         var built = self.inputConnector.end1.build();
                         if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
                             return [built];
@@ -177,6 +179,18 @@ var NodeValue = (function () {
         };
     };
     ;
+    NodeValue.prototype.remove = function () {
+        if (this.inputConnector) {
+            this.inputConnector.remove();
+            this.inputConnector = null;
+        }
+        this.svgEntity.remove();
+        this.svgEntity = null;
+        if (this.popup) {
+            document.body.removeChild(this.popup);
+        }
+        this.parentNode = null;
+    };
     NodeValue.prototype.updateConectorPosition = function () {
         if (this.inputConnector) {
             this.inputConnector.ep = this.getDotPosition();

@@ -203,7 +203,7 @@ export class Node {
             values: this.values.map(v => {
                 return {
                     valueID: v.options.id,
-                    value: v.__internalGetValue()
+                    value: v.__internalGetValue(true)
                 };
             }),
             outputConnectors: this.outputConnectors.map(c => {
@@ -213,6 +213,8 @@ export class Node {
                 };
             })
         };
+        model.arguments.x = this.position.x;
+        model.arguments.y = this.position.y;
         return model;
     };
 
@@ -260,11 +262,10 @@ export class Node {
     remove() {
         let self = this;
         this.values.forEach(function(val) {
-            if (val.inputConnector) {
-                val.inputConnector.remove();
-            };
+            val.remove();
         });
-        [].concat(this.outputConnectors).forEach(function(con) {
+        this.values = null;
+        [].concat(this.outputConnectors).forEach(function(con: NodeConnector) {
             con.remove();
         });
 		if (this.onremove instanceof Function) {
