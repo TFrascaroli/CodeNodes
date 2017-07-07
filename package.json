@@ -2,7 +2,8 @@
   "name": "codenodes",
   "version": "1.0.2",
   "description": "UI for code generation of entities relationship.",
-  "main": "src/codenodes.ts",
+  "main": "./dist/codenodes.js",
+  "types": "./types/codenodes.d.ts",
   "directories": {
     "test": "test"
   },

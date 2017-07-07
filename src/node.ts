@@ -9,10 +9,6 @@ import {INodeModel} from "./interfaces/INodeModel";
 const namespace = "http://www.w3.org/2000/svg";
 const ROW_HEIGHT = 38;
 
-
-declare type NodeValueModel = {valueID:number, value: any};
-declare type NodeConnectorModel = {valueID:number, nodeID: number};
-
 export class Node {
 
     private rect: SVGRectElement;
@@ -226,7 +222,7 @@ export class Node {
         return null;
     }
 
-    setValues (vs: NodeValueModel[]) {
+    setValues (vs:  {valueID:number, value: any}[]) {
         let self = this;
         if (!this.options.isCollection) {
             vs.forEach(v => {

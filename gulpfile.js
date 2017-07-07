@@ -21,14 +21,17 @@ var tsProject = ts.createProject("tsconfig.json");
 var tsTestProject = ts.createProject("tsconfig.json");
 
 gulp.task("build-app", function() {
-    return gulp.src([
+    var tspipe = gulp.src([
             "src/**/**.ts",
             "typings/main.d.ts/"
         ])
         .pipe(sourcemaps.init())
-        .pipe(tsProject())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest("obj/"));
+        .pipe(tsProject());
+
+    return merge([
+        tspipe.dts.pipe(gulp.dest('./types/')),
+        tspipe.js.pipe(sourcemaps.write('.')).pipe(gulp.dest('./obj/'))
+    ]);
 });
 
 // Lint Task
@@ -37,11 +40,10 @@ gulp.task("lint", function() {
             "src/**/**.ts",
             "test/**/**.test.ts"
         ])
-        .pipe(tslint({}))
         .pipe(tslint({
             formatter: "verbose"
         }))
-        .pipe(tslint.report())
+        .pipe(tslint.report());
 });
 
 gulp.task("bundle", ["build-app"], function() {
@@ -73,6 +75,8 @@ gulp.task("bundle", ["build-app"], function() {
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(outputFolder));
+
+
     return merge(s1, s2);
 });
 
