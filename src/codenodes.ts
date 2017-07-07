@@ -4,9 +4,12 @@ import {CodeNodesMenu} from "./menu";
 import {Point} from "./point";
 import {ICodeNodesType} from "./interfaces/ICodeNodesType";
 import {ICodeNodesValueSchema} from "./interfaces/ICodeNodesValueSchema";
+import {INodeArguments} from "./interfaces/INodeArguments";
+import {INodeModel} from "./interfaces/INodeModel";
 import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
+import * as svgPanZoom from "svg-pan-zoom";
 
- export class CodeNodes {
+export class CodeNodes {
     
     public canvas: NodeCanvas;
     public types:ICodeNodesType[];
@@ -161,3 +164,15 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
         return this.canvas.getOfType(type);
     }
 }
+
+export * from "./nodecanvas";
+export * from "./node";
+export * from "./menu";
+export * from "./point";
+export * from "./interfaces/ICodeNodesModel";
+export * from "./interfaces/ICodeNodesType";
+export * from "./interfaces/ICodeNodesValueSchema";
+export * from "./interfaces/INodeArguments";
+export * from "./interfaces/INodeModel";
+export * from "./nodeconnector";
+export * from "./nodevalue";

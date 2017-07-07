@@ -35,7 +35,7 @@ gulp.task('definitions', function(done) {
         name: 'codenodes',
         baseDir: 'obj/',
         main: './obj/codenodes.d.ts',
-        out: '../types/codenodes.d.ts',
+        out: '../dist/codenodes.d.ts',
         externals: true,
         verbose: true
     });
@@ -72,7 +72,6 @@ gulp.task("bundle", ["build-app"], function() {
         standalone: libraryName
     });
     var s1 = b2.add(mainTsFilePath)
-        .exclude("svg-pan-zoom")
         .bundle()
         .pipe(source(outputFileName))
         .pipe(buffer())

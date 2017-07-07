@@ -3,7 +3,7 @@
   "version": "1.0.6",
   "description": "UI for code generation of entities relationship.",
   "main": "./dist/codenodes.js",
-  "types": "./types/codenodes.d.ts",
+  "types": "./dist/codenodes.d.ts",
   "directories": {
     "test": "test"
   },
