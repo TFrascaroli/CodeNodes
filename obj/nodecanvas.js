@@ -246,6 +246,11 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.getOfType = function (type) {
+        return this.nodes.filter(function (n) {
+            return n.options.type.id === type;
+        });
+    };
     return NodeCanvas;
 }());
 exports.NodeCanvas = NodeCanvas;

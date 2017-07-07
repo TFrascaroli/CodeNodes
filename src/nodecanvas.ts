@@ -273,4 +273,10 @@ export class NodeCanvas {
 			return n.outputConnectors.length === 0;
 		});
 	};
+
+    getOfType(type: string): Node[] {
+        return this.nodes.filter(function (n) {
+			return n.options.type.id === type;
+		});
+    }
 }

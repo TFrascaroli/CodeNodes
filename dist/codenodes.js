@@ -580,13 +580,11 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
@@ -594,35 +592,28 @@ SvgPanZoom.prototype.setupHandlers = function() {
 
     // Mouse up group
   , mouseup: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchend: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
   , touchmove: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchleave: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchcancel: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   }
@@ -2678,6 +2669,11 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.getOfType = function (type) {
+        return this.nodes.filter(function (n) {
+            return n.options.type.id === type;
+        });
+    };
     return NodeCanvas;
 }());
 exports.NodeCanvas = NodeCanvas;
