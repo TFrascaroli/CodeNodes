@@ -1,6 +1,6 @@
 {
   "name": "codenodes",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "UI for code generation of entities relationship.",
   "main": "./dist/codenodes.js",
   "types": "./dist/codenodes.d.ts",
