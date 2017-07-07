@@ -1,10 +1,12 @@
+import { NodeCanvas } from "./nodecanvas";
 import { Node } from "./node";
+import { CodeNodesMenu } from "./menu";
 import { ICodeNodesType } from "./interfaces/ICodeNodesType";
 import { ICodeNodesModel } from "./interfaces/ICodeNodesModel";
 export declare class CodeNodes {
-    private canvas;
+    canvas: NodeCanvas;
     types: ICodeNodesType[];
-    private menu;
+    menu: CodeNodesMenu;
     private menuPoint;
     private nodesCount;
     constructor(types: ICodeNodesType[]);

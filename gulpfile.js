@@ -36,7 +36,8 @@ gulp.task('definitions', function(done) {
         baseDir: 'obj/',
         main: './obj/codenodes.d.ts',
         out: '../types/codenodes.d.ts',
-        externals: true
+        externals: true,
+        verbose: true
     });
     done();
 });

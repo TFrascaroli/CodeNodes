@@ -8,9 +8,9 @@ import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
 
  export class CodeNodes {
     
-    private canvas: NodeCanvas;
+    public canvas: NodeCanvas;
     public types:ICodeNodesType[];
-    private menu: CodeNodesMenu;
+    public menu: CodeNodesMenu;
     private menuPoint: Point;
     private nodesCount: number = 0;
 

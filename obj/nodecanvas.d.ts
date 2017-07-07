@@ -11,7 +11,7 @@ export declare class NodeCanvas {
     private paths;
     private draggingEntity;
     private diff;
-    private zoomingSvg;
+    zoomingSvg: SvgPanZoom.Instance;
     ondblclick: Function;
     onclick: Function;
     private offset;
