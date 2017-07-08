@@ -6,866 +6,785 @@
 </head>
 
 <body style="width:100%; height:100%; margin:0px;">
-
     <script>
-        var cn2 = new codenodes.CodeNodes({
-            colValue: {
+        var cn2 = new codenodes.CodeNodes([{
+                id: "colValue",
+                name: "Column value",
+                description: "Value for a specific column and row",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
+                    id: 0,
                     name: "Column definition",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
+                    id: 1,
                     name: "Parent row",
                     type: "Row",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "value",
+                    id: 2,
+                    name: "Value type",
                     type: "select", // Opcions amb els tipus de dades admesses
-                    mode: "edit",
                     options: [{
-                        show: "Numero",
+                        show: "Number",
                         save: "number"
                     }, {
-                        show: "Data",
+                        show: "Date",
                         save: "date"
                     }, {
-                        show: "text",
+                        show: "Plain text",
                         save: "string"
                     }]
                 }, ]
-            },
-            Row: {
+            }, {
+                id: "row",
+                name: "Row model",
+                description: "Row data for SledgeHammer",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
+                    id: 0,
                     name: "Values",
                     type: "value",
                     mode: "in",
                     multiple: true
                 }]
-            },
-            colDef: {
+            }, {
+                id: "colDef",
+                name: "Column definition",
+                description: "Column definition for a table",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "columnID",
+                    id: 0,
+                    name: "ColumnID",
                     type: "text",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "heading",
+                    id: 1,
+                    name: "Heading",
                     type: "text",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "color",
+                    id: 2,
+                    name: "Color",
                     type: "color",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "type",
+                    id: 3,
+                    name: "Value type",
                     type: "select",
-                    mode: "edit",
                     options: [{
-                        show: "Numero",
+                        show: "Number",
                         save: "number"
                     }, {
-                        show: "Data",
+                        show: "Date",
                         save: "date"
                     }, {
-                        show: "text",
+                        show: "Plain text",
                         save: "string"
                     }]
                 }, {
-                    onBuild: true,
-                    name: "format",
+                    id: 4,
+                    name: "Format",
                     type: "text",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "width-rep",
+                    id: 5,
+                    name: "Column width",
                     type: "text",
-                    mode: "edit"
                 }]
-            },
-            table: {
+            }, {
+                id: "table",
+                name: "Table",
+                description: "Table model, requiring rows and columns",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "rows",
+                    id: 0,
+                    name: "Name",
+                    type: "text",
+                }, {
+                    id: 1,
+                    name: "Description",
+                    type: "popup",
+                }, {
+                    id: 2,
+                    name: "Rows",
                     type: "row",
                     mode: "in",
                     multiple: true
                 }, {
-                    onBuild: true,
-                    name: "columns",
+                    id: 3,
+                    name: "Columns",
                     type: "colDef",
                     mode: "in",
                     multiple: true
-                }, {
-                    onBuild: true,
-                    name: "name",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "description",
-                    type: "select",
-                    mode: "edit"
                 }]
-            },
-            TC: {
+            }, {
+                id: "TC",
+                name: "Table collection",
+                description: "Collection of tables to use on the operators",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "tables",
+                    id: 0,
+                    name: "Tables",
                     type: "table",
                     mode: "in",
                     multiple: true
                 }]
-            }, // Reference More Col
-            colRefReference: {
+            }, {
+                id: "colRefReference",
+                name: "Reference column",
+                description: "Middle-way for a column definition to go inside some operators",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "coldef",
+                    id: 0,
+                    name: "Column definition",
                     type: "colDef",
                     mode: "in"
                 }]
-            },
-            SumOperator: {
+            }, {
+                id: "SumOperator",
+                name: "Sum operator",
+                description: "Sum operator for multiple columns",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
+                    id: 0,
                     name: "Table Collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "SumOptions",
                     mode: "in"
                 }]
-            },
-            SumDateOperator: {
+            }, {
+                id: "SumDateOperator",
+                name: "Sum operator (for dates)",
+                description: "Sum operator for a multiple columns of dates",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "SumDateOptions",
                     mode: "in"
                 }]
-            },
-            MulOperator: {
+            }, {
+                id: "MulOperator",
+                name: "Multiplication operator",
+                description: "Multiplication operator for a multiple columns",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "MulOptions",
                     mode: "in"
                 }]
-            },
-            Div2ColOperator: {
+            }, {
+                id: "Div2ColOperator",
+                name: "Division of columns",
+                description: "Divides one column for another",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "Div2ColOptions",
                     mode: "in"
                 }]
-            },
-            DivColScalarOperator: {
+            }, {
+                id: "DivColScalarOperator",
+                name: "Division of column by scalar",
+                description: "Division of column by scalar",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator option",
                     type: "DivColScalarOptions",
                     mode: "in"
                 }]
-            },
-            DivScalarColOperator: {
+            }, {
+                id: "DivScalarColOperator",
+                name: "Division of scalar by column",
+                description: "Division of scalar by column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator option",
                     type: "DivScalarColOptions",
                     mode: "in"
                 }]
-            },
-            Sub2ColOperator: {
+            }, {
+                id: "Sub2ColOperator",
+                name: "Subtraction of two columns",
+                description: "Subtracts the second column provided from the first column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator option",
                     type: "Sub2ColOptions",
                     mode: "in"
                 }]
-            },
-            SubColScalarOperator: {
+            }, {
+                id: "SubColScalarOperator",
+                name: "Subtraction of column and scalar",
+                description: "Subtracts the scalar provided from the column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator option",
                     type: "SubColScalarOptions",
                     mode: "in"
                 }]
-            },
-            SubScalarColOperator: {
+            }, {
+                id: "SubScalarColOperator",
+                name: "Subtraction of scalar and column",
+                description: "Subtracts the column provided from the scalar",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator option",
                     type: "SubScalarColOptions",
                     mode: "in"
                 }]
-            },
-            SumOptions: {
+            }, {
+                id: "SumOptions",
+                name: "Sum options",
+                description: "Provides the options for the sum operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "columns",
+                    id: 0,
+                    name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
-                    onBuild: true,
-                    name: "scalar",
+                    id: 1,
+                    name: "Scalar",
                     type: "number",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            SumDateOptions: {
+            }, {
+                id: "SumDateOptions",
+                name: "Sum options (for dates)",
+                description: "Provides the options for the sum operator for dates",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "columns",
+                    id: 0,
+                    name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
-                    onBuild: true,
-                    name: "scalar",
+                    id: 1,
+                    name: "Scalar",
                     type: "number",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "format",
-                    type: "text",
-                    mode: "edit"
                 }]
-            },
-            MulOptions: {
+            }, {
+                id: "MulOptions",
+                name: "Multiplication options",
+                description: "Provides the options for the multiplication operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "columns",
+                    id: 0,
+                    name: "Columns to sum",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
-                    onBuild: true,
-                    name: "scalar",
+                    id: 1,
+                    name: "Scalar",
                     type: "number",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            Div2ColOptions: {
+            }, {
+                id: "Div2ColOptions",
+                name: "Division options",
+                description: "Provides the options for the division operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "Dividend",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
+                    id: 1,
+                    name: "Divisor",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "scalar",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            DivColScalarOptionsOptions: {
+            }, {
+                id: "DivColScalarOptionsOptions",
+                name: "Division options - column by scalar",
+                description: "Provides the options for the division operator of a column by a scalar",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "Dividend",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
-                    type: "colRefReference",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "scalar",
+                    id: 1,
+                    name: "Divisor",
                     type: "number",
-                    mode: "edit"
                 }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            DivScalarColOptionsOptions: {
+            }, {
+                id: "DivScalarColOptionsOptions",
+                name: "Division options - scalar by colum",
+                description: "Provides the options for the division operator of a scalar by a column",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "Dividend",
+                    type: "number"
+                }, {
+                    id: 1,
+                    name: "Divisor",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
-                    type: "colRefReference",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "scalar",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            Sub2ColOptions: {
+            }, {
+                id: "Sub2ColOptions",
+                name: "Subtraction options",
+                description: "Provides the options for the subtraction operator of two columns",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "First column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
+                    id: 1,
+                    name: "Second column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "scalar",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            SubColScalarOptionsOptions: {
+            }, {
+                id: "SubColScalarOptionsOptions",
+                name: "Subtraction options - scalar from column",
+                description: "Provides the options for the subtraction operator of a scalar from a column",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "First column",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
-                    type: "colRefReference",
-                    mode: "in"
+                    id: 1,
+                    name: "Scalar",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "scalar",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            SubScalarColOptionsOptions: {
+            }, {
+                id: "SubScalarColOptionsOptions",
+                name: "Subtraction options - column from scalar",
+                description: "Provides the options for the subtraction operator of a column from a scalar",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column1",
+                    id: 0,
+                    name: "First column",
+                    type: "number"
+                }, {
+                    id: 1,
+                    name: "Scalar",
                     type: "colRefReference",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "column2",
-                    type: "colRefReference",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "scalar",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
+                    id: 2,
+                    name: "Resulting col. def.",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "resultTCindex",
+                    id: 3,
+                    name: "Resulting table",
                     type: "number",
-                    mode: "edit"
                 }]
             }, //Reference same Col
-            SumColOperator: {
+            {
+                id: "SumColOperator",
+                name: "Sum operator for a single column",
+                description: "Sum operator that provides the results of a single column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "SumaColOptions",
                     mode: "in"
                 }]
-            },
-            SortOperator: {
+            }, {
+                id: "SortOperator",
+                name: "Sort",
+                description: "Sorts a single column with the options provided",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "SortOptions",
                     mode: "in"
                 }]
-            },
-            MinOperator: {
+            }, {
+                id: "MinOperator",
+                name: "Minimum operator",
+                description: "Minimum operator for a single column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "MinOptions",
                     mode: "in"
                 }]
-            },
-            MaxOperator: {
+            }, {
+                id: "MaxOperator",
+                name: "Maximum operator",
+                description: "Maximum operator for a single column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "MaxOptions",
                     mode: "in"
                 }]
-            },
-            MedianOperator: {
+            }, {
+                id: "MedianOperator",
+                name: "Median operator",
+                description: "Median operator for a single column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "MedianOptions",
                     mode: "in"
                 }]
-            },
-            AverageOperator: {
+            }, {
+                id: "AverageOperator",
+                name: "Average operator",
+                description: "Average operator for a single column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "AverageOptions",
                     mode: "in"
                 }]
-            },
-            LogicalOperator: {
+            }, {
+                id: "LogicalOperator",
+                name: "Logical operator",
+                description: "Sumarizes a column to whether it complies with a logical condition applied to all its rows",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "LogicalOptions",
                     mode: "in"
                 }]
-            },
-            FilterOperator: {
+            }, {
+                id: "FilterOperator",
+                name: "Filter operator",
+                description: "Filters a table for a certain column and condition",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "FilterOptions",
                     mode: "in"
                 }]
-            },
-            BooleanOperator: {
+            }, {
+                id: "BooleanOperator",
+                name: "Boolean operator",
+                description: "Similar to de logical operator, but this one checks each row and outputs the results to a new column",
                 builder: function() {},
                 outputType: "TC",
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 1,
+                    name: "Operator options",
                     type: "BooleanOptions",
                     mode: "in"
                 }]
-            },
-            SumaColOptions: {
+            }, {
+                id: "SumaColOptions",
+                name: "Sum operator options single column",
+                description: "Options for the single column sum operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column",
+                    id: 0,
+                    name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
+                    id: 1,
+                    name: "Table index",
                     type: "number",
-                    mode: "edit"
                 }]
-            },
-            SortOptions: {
+            }, {
+                id: "SortOptions",
+                name: "Sort operator options",
+                description: "Options for the sort operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column",
+                    id: 0,
+                    name: "Column to order",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "order",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }]
-            },
-            MinOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }]
-            },
-            MaxOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }]
-            },
-            MedianOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }]
-            },
-            AverageOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }]
-            },
-            LogicalOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "condition",
-                    type: "FilterBooleanOptions:",
-                    mode: "in",
-                }, {
-                    onBuild: true,
-                    name: "value",
-                    type: "colValue",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "logicalOp",
+                    id: 1,
+                    name: "Direction",
                     type: "select",
-                    mode: "edit",
                     options: [{
-                        show: "AND",
-                        save: 0
+                        show: "Ascending",
+                        save: "ASC"
                     }, {
-                        show: "OR",
-                        save: 1
+                        show: "Descending",
+                        save: "DES"
                     }]
                 }, {
-                    onBuild: true,
-                    name: "TextTrue",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "TextFalse",
-                    type: "text",
-                    mode: "edit"
-                }]
-            },
-            FilterOptions: {
-                builder: function() {},
-                schema: [{
-                    onBuild: true,
-                    name: "column",
-                    type: "colDef",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "indexTC",
+                    name: "Table index",
                     type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "condition",
-                    type: "FilterBooleanOptions",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "value",
-                    type: "colValue",
-                    mode: "in"
                 }]
-            },
-            BooleanOptions: {
+            }, {
+                id: "MinOptions",
+                name: "Minimum operator options",
+                description: "Options for the minimum operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column",
+                    id: 0,
+                    name: "Column",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
+                    id: 1,
+                    name: "Table index",
                     type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "condition",
-                    type: "FilterBooleanOptions",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "value",
-                    type: "colValue",
-                    mode: "in"
-                }, {
-                    onBuild: true,
-                    name: "TextTrue",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "TextFalse",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "resultColDef",
-                    type: "colDef",
-                    mode: "in"
                 }]
-            },
-            FilterBooleanOptions: {
+            }, {
+                id: "MaxOptions",
+                name: "Maximum operator options",
+                description: "Options for the maximum operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "Options",
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number",
+                }]
+            }, {
+                id: "MedianOptions",
+                name: "Median operator options",
+                description: "Options for the median operator",
+                builder: function() {},
+                schema: [{
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number",
+                }]
+            }, {
+                id: "AverageOptions",
+                name: "Average operator options",
+                description: "Options for the average operator",
+                builder: function() {},
+                schema: [{
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number",
+                }]
+            }, {
+                id: "LogicalOptions",
+                name: "Logical operator options",
+                description: "Options for the logical operator",
+                builder: function() {},
+                schema: [{
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number",
+                }, {
+                    id: 2,
+                    name: "Condition",
                     type: "select",
-                    mode: "edit",
+
                     options: [{
                         show: "mes petit que",
                         save: 0
@@ -891,315 +810,394 @@
                         show: "valor no null",
                         save: 7
                     }]
+                }, {
+                    id: 3,
+                    name: "Value",
+                    type: "colValue",
+                    mode: "in"
+                }, {
+                    id: 4,
+                    name: "Logical operator",
+                    type: "select",
+                    options: [{
+                        show: "And",
+                        save: 0
+                    }, {
+                        show: "Or",
+                        save: 1
+                    }]
+                }, {
+                    id: 5,
+                    name: "Result if true",
+                    type: "text"
+                }, {
+                    id: 6,
+                    name: "Result if false",
+                    type: "text"
                 }]
-            }, //representation
-            TableRepresentation: {
+            }, {
+                id: "FilterOptions",
+                name: "Filter operator options",
+                description: "Options for the filter operator",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
+                }, {
+                    id: 2,
+                    name: "Condition",
+                    type: "select",
+                    options: [{
+                        show: "mes petit que",
+                        save: 0
+                    }, {
+                        show: "mes petit o igual que",
+                        save: 1
+                    }, {
+                        show: "igual que",
+                        save: 2
+                    }, {
+                        show: "no igual que",
+                        save: 3
+                    }, {
+                        show: "mes gran o igual que",
+                        save: 4
+                    }, {
+                        show: "mes gran que",
+                        save: 5
+                    }, {
+                        show: "valor null",
+                        save: 6
+                    }, {
+                        show: "valor no null",
+                        save: 7
+                    }]
+                }, {
+                    id: 3,
+                    name: "Value",
+                    type: "colValue",
+                    mode: "in"
+                }]
+            }, {
+                id: "BooleanOptions",
+                name: "Boolean operator options",
+                description: "Options for the boolean operator",
+                builder: function() {},
+                schema: [{
+                    id: 0,
+                    name: "Column",
+                    type: "colDef",
+                    mode: "in"
+                }, {
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
+                }, {
+                    id: 2,
+                    name: "Condition",
+                    type: "select",
+                    options: [{
+                        show: "mes petit que",
+                        save: 0
+                    }, {
+                        show: "mes petit o igual que",
+                        save: 1
+                    }, {
+                        show: "igual que",
+                        save: 2
+                    }, {
+                        show: "no igual que",
+                        save: 3
+                    }, {
+                        show: "mes gran o igual que",
+                        save: 4
+                    }, {
+                        show: "mes gran que",
+                        save: 5
+                    }, {
+                        show: "valor null",
+                        save: 6
+                    }, {
+                        show: "valor no null",
+                        save: 7
+                    }]
+                }, {
+                    id: 3,
+                    name: "Value",
+                    type: "colValue",
+                    mode: "in"
+                }, {
+                    id: 4,
+                    name: "Result if true",
+                    type: "text"
+                }, {
+                    id: 5,
+                    name: "Result if false",
+                    type: "text"
+                }, {
+                    id: 6,
+                    name: "Resulting col. def.",
+                    type: "colDef",
+                    mode: "in"
+                }]
+            }, {
+                id: "TableRepresentation",
+                name: "Table representation",
+                description: "Represents data in a table format",
+                builder: function() {},
+                schema: [{
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "amplada",
-                    type: "number",
-                    mode: "edit"
+                    id: 2,
+                    name: "Width",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "alçada",
-                    type: "number",
-                    mode: "edit"
+                    id: 3,
+                    name: "Height",
+                    type: "number"
                 }]
-            },
-            BarGraphRepresentation: {
+            }, {
+                id: "BarGraphRepresentation",
+                name: "Bar graph representation",
+                description: "Represents data in a bar graph format",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "amplada",
-                    type: "number",
-                    mode: "edit"
+                    id: 2,
+                    name: "Width",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "alçada",
-                    type: "number",
-                    mode: "edit"
+                    id: 3,
+                    name: "Height",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 4,
+                    name: "Graph options",
                     type: "BarGraphOptions",
                     mode: "in"
                 }]
-            },
-            PieGraphRepresentation: {
+            }, {
+                id: "PieGraphRepresentation",
+                name: "Pie graph representation",
+                description: "Represents data in a pie graph format",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "amplada",
-                    type: "number",
-                    mode: "edit"
+                    id: 2,
+                    name: "Width",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "alçada",
-                    type: "number",
-                    mode: "edit"
+                    id: 3,
+                    name: "Height",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 4,
+                    name: "Graph options",
                     type: "PieGraphOptions",
                     mode: "in"
                 }]
-            },
-            TemplatesRepresentation: {
+            }, {
+                id: "TemplatesRepresentation",
+                name: "Template representation",
+                description: "Represents data by compiling a template with the data provided",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "TC",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "indexTC",
-                    type: "number",
-                    mode: "edit"
+                    id: 1,
+                    name: "Table index",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "amplada",
-                    type: "number",
-                    mode: "edit"
+                    id: 2,
+                    name: "Width",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "alçada",
-                    type: "number",
-                    mode: "edit"
+                    id: 3,
+                    name: "Height",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "options",
+                    id: 4,
+                    name: "Graph options",
                     type: "TemplateOptions",
                     mode: "in"
                 }]
-            },
-            BarGraphOptions: {
+            }, {
+                id: "BarGraphOptions",
+                name: "Bar graph options",
+                description: "Provides the options for the bar graph representation",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "columnX",
+                    id: 0,
+                    name: "X Axis column",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "columns Y",
+                    id: 1,
+                    name: "Y Axis colum(s)",
                     type: "colDef",
                     mode: "in",
                     multiple: true
                 }, {
-                    onBuild: true,
-                    name: "llegenda",
-                    type: "boolean",
-                    mode: "edit"
+                    id: 2,
+                    name: "Legend?",
+                    type: "checkbox"
                 }, {
-                    onBuild: true,
+                    id: 3,
                     name: "orientation",
-                    type: "text",
-                    mode: "edit"
+                    type: "select",
+                    option: [{
+                        show: "Horizontal",
+                        save: "Horitzontal"
+                    }, {
+                        show: "Vertical",
+                        save: "Vertical"
+                    }]
                 }, {
-                    onBuild: true,
-                    name: "Agrupat",
-                    type: "boolean",
-                    mode: "edit"
+                    id: 4,
+                    name: "Grouped?",
+                    type: "checkbox"
                 }, {
-                    onBuild: true,
-                    name: "Apilat",
-                    type: "boolean",
-                    mode: "edit"
+                    id: 5,
+                    name: "Piled?",
+                    type: "checkbox"
                 }, {
-                    onBuild: true,
-                    name: "Index TC",
-                    type: "number",
-                    mode: "edit"
+                    id: 6,
+                    name: "Table index",
+                    type: "number"
                 }]
-            },
-            PieGraphOptions: {
+            }, {
+                id: "PieGraphOptions",
+                name: "Pie graph options",
+                description: "Provides the options for the pie graph representation",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "column X",
+                    id: 0,
+                    name: "X Axis column",
                     type: "colDef",
                     mode: "in"
                 }, {
-                    onBuild: true,
-                    name: "columns Y",
-                    type: "colDef",
-                    mode: "in",
-                    multiple: true
+                    id: 1,
+                    name: "Legend?",
+                    type: "checkbox"
                 }, {
-                    onBuild: true,
-                    name: "llegenda",
-                    type: "boolean",
-                    mode: "edit"
+                    id: 2,
+                    name: "Table index",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "Index TC",
-                    type: "number",
-                    mode: "edit"
+                    id: 3,
+                    name: "Radius",
+                    type: "number"
                 }, {
-                    onBuild: true,
-                    name: "radi",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: true,
-                    name: "tipus Pie",
+                    id: 4,
+                    name: "Pie type",
                     type: "text",
-                    mode: "edit"
+                    options: [{
+                        show: "Simple pie",
+                        save: "pie"
+                    }, {
+                        show: "Doughnut shaped",
+                        save: "donut"
+                    }]
                 }]
-            },
-            TemplateOptions: {
+            }, {
+                id: "TemplateOptions",
+                name: "Template representation options",
+                description: "Provides the options for the templated representation",
                 builder: function() {},
                 schema: [{
-                    onBuild: true,
-                    name: "template",
+                    id: 0,
+                    name: "Template",
                     type: "select",
-                    mode: "edit",
                     options: [{
-                        show: "Fitxa Personal",
+                        show: "Personal file",
                         save: "personalExpedient"
                     }, {
-                        show: "Galeria d'imatges",
+                        show: "Image gallery",
                         save: "photoGallery"
                     }]
                 }, {
-                    onBuild: true,
+                    id: 1,
                     name: "Params",
                     type: "popup",
-                    mode: "edit"
                 }]
-            },
-            first: {
-                builder: function() {
-                    return "hola";
-                },
-                schema: [{
-                    onBuild: false,
-                    name: "primer valor",
-                    type: "text",
-                    mode: "edit"
-                }, {
-                    onBuild: false,
-                    name: "segundo valor",
-                    type: "range",
-                    mode: "edit",
-                    options: [100, 10]
-
-                }, {
-                    onBuild: false,
-                    name: "tercer valor",
-                    type: "number",
-                    mode: "edit"
-                }, {
-                    onBuild: false,
-                    name: "cuarto valor",
-                    type: "number",
-                    mode: "in"
-                }, {
-                    onBuild: false,
-                    name: "solo en este",
-                    type: "first",
-                    mode: "in"
-                }, {
-                    onBuild: false,
-                    name: "fecha",
-                    type: "date",
-                    mode: "edit"
-                }, {
-                    onBuild: false,
-                    name: "textillo",
-                    type: "popup",
-                    mode: "edit"
-                }, {
-                    onBuild: false,
-                    name: "cars",
-                    type: "select",
-                    mode: "edit",
-                    options: [{
-                        show: "Seat",
-                        save: 0
-                    }, {
-                        show: "Peugeot",
-                        save: 1
-                    }, {
-                        show: "Renault",
-                        save: 2
-                    }]
-                }]
-            },
-            DataSource: {
+            }, {
+                id: "DataSource",
+                name: "Mockup of initial datasource",
+                description: " - ",
                 builder: function() {},
                 outputType: "table",
                 schema: [{
-                    onBuild: true,
+                    id: 0,
                     name: "JSON",
                     type: "popup",
-                    mode: "edit"
                 }]
-            },
-            GetTable: {
+            }, {
+                id: "GetTable",
+                name: "Get table",
+                description: "Retrieve a table from a table collection",
                 builder: function() {},
                 outputType: "table",
                 schema: [{
-                    onBuild: true,
-                    name: "Table Collection",
+                    id: 0,
+                    name: "Table collection",
                     type: "TC",
                     mode: "in"
                 }, {
-                    onBuild: true,
+                    id: 1,
                     name: "Table index",
                     type: "number",
                     model: "edit"
                 }]
-            },
-            GetColDef: {
+            }, {
+                id: "GetColDef",
+                name: "Get column",
+                description: "Retrieve a column from a table",
                 builder: function() {},
                 outputType: "colDef",
                 schema: [{
-                    onBuild: true,
+                    id: 0,
                     name: "Table",
                     type: "table",
                     mode: "in"
                 }, {
-                    onBuild: true,
+                    id: 1,
                     name: "Column ID (name)",
                     type: "text",
-                    mode: "edit"
                 }]
             }
-        });
-
+        ]);
         document.body.appendChild(cn2.getSVG());
         cn2.init();
     </script>

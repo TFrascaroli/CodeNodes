@@ -55,6 +55,18 @@ var NodeCanvas = (function () {
         ;
     };
     ;
+    NodeCanvas.prototype.getTransform = function () {
+        var ctm = this.g.getCTM();
+        return {
+            pan: { x: ctm.e, y: ctm.f },
+            zoom: ctm.a
+        };
+    };
+    ;
+    NodeCanvas.prototype.setTransform = function (transform) {
+        this.zoomingSvg.zoom(transform.zoom);
+        this.zoomingSvg.pan(transform.pan);
+    };
     NodeCanvas.prototype.convertCoords = function (o) {
         var x = o.x, y = o.y;
         return {
@@ -62,8 +74,8 @@ var NodeCanvas = (function () {
             y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
         };
     };
-    NodeCanvas.prototype.addNode = function (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
-        var n = new node_1.Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y), self = this;
+    NodeCanvas.prototype.addNode = function (opts) {
+        var n = new node_1.Node(opts), self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
                 var p = self.cursorPoint(evt);
@@ -103,18 +115,21 @@ var NodeCanvas = (function () {
             });
             if (candidates.length > 0) {
                 var candidateDot = candidates[0].dot;
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
+                    return;
+                }
+                if (candidateDot.parentValue.options.type !== "any" && (candidateDot.parentValue.options.type !== cc.end1.options.type.outputType ||
+                    (!candidateDot.parentValue.options.multiple && cc.end1.options.type.outputMultiple))) {
+                    cc.remove();
+                    return;
+                }
                 if (candidateDot.parentValue.inputConnector) {
                     candidateDot.parentValue.inputConnector.remove();
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
-                    cc.remove();
-                }
-                if (cc.end1 === candidateDot.parentValue.parentNode) {
-                    cc.remove();
-                }
-                if (cc.end2.parentNode.multiple) {
+                if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
                 candidateDot.parentValue.updateConectorPosition();
@@ -130,8 +145,8 @@ var NodeCanvas = (function () {
             self.ctm = self.g.getCTM().inverse();
             self.offset = self.svg.getBoundingClientRect();
             var p1 = {
-                x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
-                y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
+                x: entity.position.x + parseInt(entity.outputOffset.x.toString()),
+                y: entity.position.y + parseInt(entity.outputOffset.y.toString())
             };
             self.currentConnector = new nodeconnector_1.NodeConnector(p1, entity);
             entity.outputConnectors.push(self.currentConnector);
@@ -167,6 +182,7 @@ var NodeCanvas = (function () {
             self.g.removeChild(n.g);
         };
         n.render(self.g);
+        return n;
     };
     ;
     NodeCanvas.prototype.init = function () {
@@ -177,12 +193,51 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.serialize = function () {
+        return this.nodes.map(function (n) {
+            return n.serialize();
+        });
+    };
+    NodeCanvas.prototype.findNode = function (id) {
+        var i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id)
+                return this.nodes[i];
+        }
+        return null;
+    };
+    NodeCanvas.prototype.parse = function (nodes) {
+        var self = this;
+        nodes.forEach(function (nm) {
+            var n = self.addNode(nm.arguments);
+            n.setValues(nm.values);
+        });
+        nodes.forEach(function (nm) {
+            var n = self.findNode(nm.arguments.id);
+            nm.outputConnectors.forEach(function (cn) {
+                var end2 = self.findNode(cn.nodeTo);
+                var p1 = {
+                    x: n.position.x + parseInt(n.outputOffset.x.toString()),
+                    y: n.position.y + parseInt(n.outputOffset.y.toString())
+                };
+                var conn = new nodeconnector_1.NodeConnector(p1, n);
+                n.outputConnectors.push(conn);
+                self.paths.appendChild(conn.path);
+                if (end2.options.isCollection) {
+                    end2.cloneLastValue();
+                }
+                var val = end2.findValue(cn.valueTo);
+                val.inputConnector = conn;
+                conn.end2 = val;
+                val.updateConectorPosition();
+            });
+        });
+    };
     NodeCanvas.prototype.clear = function () {
-        //Alert the user about the action being irreversible
-        var nds = [].concat(this.nodes);
-        nds.forEach(function (node) {
+        [].concat(this.nodes).forEach(function (node) {
             node.remove();
         });
+        this.paths.innerHTML = "";
     };
     ;
     NodeCanvas.prototype.getTerminalNodes = function () {
@@ -191,8 +246,11 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.getOfType = function (type) {
+        return this.nodes.filter(function (n) {
+            return n.options.type.id === type;
+        });
+    };
     return NodeCanvas;
 }());
 exports.NodeCanvas = NodeCanvas;
-
-//# sourceMappingURL=nodecanvas.js.map

@@ -13,7 +13,7 @@ export class CodeNodesMenu {
         this.main = main;
         this.g = document.createElementNS(namespace, "g");
         this.g.classList.add("menu-g");
-
+        let selectedValue: string = null;
         let popup = document.createElement("div");
         popup.classList.add("codenodes-menu-popup");
         this.popup = popup;
@@ -25,12 +25,14 @@ export class CodeNodesMenu {
         popupWraper.classList.add("wraper");
         let popupTitle = document.createElement("div");
         popupTitle.classList.add("title");
-        let entitySelector = document.createElement("select");
+        let entitySelector = document.createElement("div");
+        entitySelector.classList.add("select");
         let entitySelectorWrap = document.createElement("div");
         entitySelectorWrap.classList.add("entity-selector");
         let entityName = document.createElement("input");
+        entityName.type = "text";
         let entityNameWrap = document.createElement("div");
-        entitySelectorWrap.classList.add("entity-name");
+        entityNameWrap.classList.add("entity-name");
         let popupOK = document.createElement("div");
         popupOK.classList.add("ok");
 
@@ -48,22 +50,34 @@ export class CodeNodesMenu {
             self.close();
             switch(addMode) {
                 case "node":
-                    main.addNode(entityName.value, entitySelector.value);
+                    main.addNode(entityName.value, selectedValue);
                 break;
                 case "collection":
-                    main.addCollection(entityName.value, entitySelector.value);
+                    main.addCollection(entityName.value, selectedValue);
                 break;
             }
         });
 
         function fillEntitySelector () {
             entitySelector.innerHTML = "";
-            entitySelector.value = "";
-            let types = Object.keys(self.main.types).filter(p => { return self.main.types.hasOwnProperty(p)});
-            types.forEach(function (t) {
-                let opt = document.createElement("option");
-                opt.textContent = t;
-                opt.value = t;
+            self.main.types.forEach(function (t) {
+                let opt = document.createElement("div");
+                opt.classList.add("option");
+                let name = document.createElement("div");
+                let desc = document.createElement("div");
+                name.classList.add("name");
+                desc.classList.add("desc");
+                name.textContent = t.name;
+                desc.textContent = t.description;
+                opt.appendChild(name);
+                opt.appendChild(desc);
+                opt.addEventListener("click", function () {
+                    [].forEach.call(entitySelector.querySelectorAll(".option"), function (o) {
+                        o.classList.remove("selected");
+                    });
+                    opt.classList.add("selected");
+                    selectedValue = t.id;
+                });
                 entitySelector.appendChild(opt);
             });
         }
@@ -115,6 +129,11 @@ export class CodeNodesMenu {
                 break;
                 case 3:
                     t.textContent = "Reset";
+                    rect.addEventListener("click", function (evt) {
+                        main.clear();
+                        self.close();
+                        evt.stopPropagation();
+                    });
                 break;
             }
         }

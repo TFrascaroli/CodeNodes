@@ -327,6 +327,16 @@
     width:100%;
     height:100%;
 
+    input[type=text],
+    input[type=number] {
+        background-color: transparent;
+        border: none;
+        outline: none;
+        color: #e6e6e6;
+        font-size:16px;
+        border-bottom: 1px solid #575757;
+    }
+
     &.visible {
         display:block;
     }
@@ -340,7 +350,7 @@
     .wraper {
         position:absolute;
         width:500px;
-        height:300px;
+        height:600px;
         top:50%;
         left:50%;
         transform:translate(-50%, -50%);
@@ -354,12 +364,46 @@
             background-color:#252525;
             padding:5px;
 
-            .text {
-                width:calc(100% ~"-" 20px);
-                height:calc(100% ~"-" 20px);
-                padding:10px;
-                color:#dedede;
-                background-color:#464646;
+            .entity-name {
+                width:100%;
+                height:40px;
+                margin-bottom:10px;
+
+                input {
+                    margin-top:15px;
+                }
+            }
+
+            .entity-selector {
+                width:100%;
+                height:calc(100% ~"-" 50px);
+
+                .select {
+                    border:none;
+                    background:transparent;
+                    outline: none;
+                    color: #e6e6e6;
+                    width:100%;
+                    height:100%;
+                    overflow:auto;
+                    font-size:16px;
+
+                    .option {
+                        padding:5px;
+
+                        .desc {
+                            font-size:12px;
+                            padding:3px;
+                        }
+                        &.selected {
+                            color: #3377dd;
+                        }
+                        &:hover {
+                            background-color: #2a2a2a;
+                            cursor: pointer;
+                        }
+                    }
+                }
             }
 
             .ok {
@@ -371,7 +415,7 @@
                 color:#dedede;
                 border-radius:50%;
                 position:absolute;
-                bottom:-10px;
+                bottom:-25px;
                 left:50%;
                 transform:translateX(-50%);
             }

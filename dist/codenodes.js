@@ -580,13 +580,13 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
@@ -594,35 +594,35 @@ SvgPanZoom.prototype.setupHandlers = function() {
 
     // Mouse up group
   , mouseup: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchend: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
   , touchmove: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchleave: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchcancel: function(evt) {
-		if (!(evt.target instanceof SVGSVGElement)) return;
+		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   }
@@ -1898,9 +1898,12 @@ var nodecanvas_1 = require("./nodecanvas");
 var menu_1 = require("./menu");
 var CodeNodes = (function () {
     function CodeNodes(types) {
+        this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
-        this.types = types;
+        this.types = types.sort(function (a, b) {
+            return b.name.localeCompare(a.name);
+        }).reverse();
         this.menu = new menu_1.CodeNodesMenu(this);
         this.canvas.ondblclick = function (p, rawP) {
             self.menuPoint = p;
@@ -1924,14 +1927,55 @@ var CodeNodes = (function () {
     CodeNodes.prototype.center = function () {
         this.canvas.center();
     };
+    ;
+    CodeNodes.prototype.clear = function () {
+        this.canvas.clear();
+    };
+    CodeNodes.prototype.findType = function (tID) {
+        var i = 0, len = this.types.length;
+        for (; i < len; i++) {
+            if (this.types[i].id === tID)
+                return this.types[i];
+        }
+        return null;
+    };
+    CodeNodes.prototype.collectionTypeOf = function (t) {
+        return {
+            id: t.id,
+            name: t.name,
+            description: "(Collection) " + t.description,
+            builder: this.collectionBuilder,
+            clone: this.collectionClone,
+            clonable: t.clonable,
+            outputType: t.outputType,
+            outputMultiple: true,
+            schema: [
+                {
+                    name: " - " + t.name,
+                    type: t.id,
+                    mode: "in",
+                    options: null,
+                    multiple: false
+                }
+            ]
+        };
+    };
     CodeNodes.prototype.addNode = function (name, type) {
-        var t = this.types[type];
+        var t = this.findType(type);
         if (t) {
             var outputType = t.outputType || type;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
-                this.canvas.addNode(name, t.builder, t.schema, type, t.clonable || false, t.clone, false, outputType, p.x, p.y);
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: t,
+                    isCollection: false,
+                    x: p.x,
+                    y: p.y
+                });
             }
             else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
@@ -1961,23 +2005,22 @@ var CodeNodes = (function () {
     };
     ;
     CodeNodes.prototype.addCollection = function (name, ofType) {
-        var t = this.types[ofType];
+        var t = this.findType(ofType);
         if (t) {
             var outputType = t.outputType || ofType;
-            var ot = this.types[outputType];
+            var ot = this.findType(outputType);
+            t["outputType"] = outputType;
             if (ot) {
-                var collectionSchema = [
-                    {
-                        onBuild: true,
-                        name: " - " + ofType,
-                        type: ofType,
-                        mode: "in",
-                        options: null,
-                        multiple: false
-                    }
-                ];
                 var p = this.menuPoint || { x: 10, y: 10 };
-                this.canvas.addNode(name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y);
+                //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
+                this.canvas.addNode({
+                    id: this.nodesCount++,
+                    title: name,
+                    type: this.collectionTypeOf(t),
+                    isCollection: true,
+                    x: p.x,
+                    y: p.y
+                });
             }
             else {
                 console.log("There is no type " + outputType + " registered. Can not assign output type.");
@@ -1988,11 +2031,24 @@ var CodeNodes = (function () {
         }
     };
     ;
+    CodeNodes.prototype.serialize = function () {
+        return {
+            nodes: this.canvas.serialize(),
+            transform: this.canvas.getTransform()
+        };
+    };
+    ;
+    CodeNodes.prototype.parse = function (model) {
+        var self = this;
+        this.canvas.setTransform(model.transform);
+        self.canvas.parse(model.nodes);
+    };
+    CodeNodes.prototype.getOfType = function (type) {
+        return this.canvas.getOfType(type);
+    };
     return CodeNodes;
 }());
 exports.CodeNodes = CodeNodes;
-
-
 
 },{"./menu":9,"./nodecanvas":11}],9:[function(require,module,exports){
 "use strict";
@@ -2005,6 +2061,7 @@ var CodeNodesMenu = (function () {
         this.main = main;
         this.g = document.createElementNS(namespace, "g");
         this.g.classList.add("menu-g");
+        var selectedValue = null;
         var popup = document.createElement("div");
         popup.classList.add("codenodes-menu-popup");
         this.popup = popup;
@@ -2016,12 +2073,14 @@ var CodeNodesMenu = (function () {
         popupWraper.classList.add("wraper");
         var popupTitle = document.createElement("div");
         popupTitle.classList.add("title");
-        var entitySelector = document.createElement("select");
+        var entitySelector = document.createElement("div");
+        entitySelector.classList.add("select");
         var entitySelectorWrap = document.createElement("div");
         entitySelectorWrap.classList.add("entity-selector");
         var entityName = document.createElement("input");
+        entityName.type = "text";
         var entityNameWrap = document.createElement("div");
-        entitySelectorWrap.classList.add("entity-name");
+        entityNameWrap.classList.add("entity-name");
         var popupOK = document.createElement("div");
         popupOK.classList.add("ok");
         popup.appendChild(popupLayer);
@@ -2037,21 +2096,33 @@ var CodeNodesMenu = (function () {
             self.close();
             switch (addMode) {
                 case "node":
-                    main.addNode(entityName.value, entitySelector.value);
+                    main.addNode(entityName.value, selectedValue);
                     break;
                 case "collection":
-                    main.addCollection(entityName.value, entitySelector.value);
+                    main.addCollection(entityName.value, selectedValue);
                     break;
             }
         });
         function fillEntitySelector() {
             entitySelector.innerHTML = "";
-            entitySelector.value = "";
-            var types = Object.keys(self.main.types).filter(function (p) { return self.main.types.hasOwnProperty(p); });
-            types.forEach(function (t) {
-                var opt = document.createElement("option");
-                opt.textContent = t;
-                opt.value = t;
+            self.main.types.forEach(function (t) {
+                var opt = document.createElement("div");
+                opt.classList.add("option");
+                var name = document.createElement("div");
+                var desc = document.createElement("div");
+                name.classList.add("name");
+                desc.classList.add("desc");
+                name.textContent = t.name;
+                desc.textContent = t.description;
+                opt.appendChild(name);
+                opt.appendChild(desc);
+                opt.addEventListener("click", function () {
+                    [].forEach.call(entitySelector.querySelectorAll(".option"), function (o) {
+                        o.classList.remove("selected");
+                    });
+                    opt.classList.add("selected");
+                    selectedValue = t.id;
+                });
                 entitySelector.appendChild(opt);
             });
         }
@@ -2100,6 +2171,11 @@ var CodeNodesMenu = (function () {
                     break;
                 case 3:
                     t.textContent = "Reset";
+                    rect.addEventListener("click", function (evt) {
+                        main.clear();
+                        self.close();
+                        evt.stopPropagation();
+                    });
                     break;
             }
         };
@@ -2120,8 +2196,6 @@ var CodeNodesMenu = (function () {
 }());
 exports.CodeNodesMenu = CodeNodesMenu;
 
-
-
 },{}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2129,33 +2203,42 @@ var nodevalue_1 = require("./nodevalue");
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
-    function Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
+    function Node(opts) {
         var self = this;
-        this.title = title;
-        this.type = type;
-        this.values = {};
-        this.clonefn = clonefn;
-        this.clonable = clonable;
-        this.multiple = multiple;
-        this.outputType = outputType;
-        this.builder = builder;
+        this.options = opts;
+        this.values = [];
         this.position = {
-            x: x,
-            y: y
+            x: this.options.x,
+            y: this.options.y
         };
-        this.schema = schema;
-        this.nRows = this.schema.length + 2;
+        this.nRows = this.options.type.schema.length + 2;
         this.onmousedown = null;
         this.outputConnectors = [];
-        this.schema.forEach(function (prop) {
-            var name = prop.name;
-            if (self.multiple) {
-                name += " 0";
+        this.options.type.schema.forEach(function (prop) {
+            self.setValueDefaults(prop);
+            var p = prop;
+            if (self.options.isCollection) {
+                p = self.collectionValueOf(p);
             }
-            self.values[name] = new nodevalue_1.NodeValue(name, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
+            self.values.push(new nodevalue_1.NodeValue(p, self));
         });
     }
     ;
+    Node.prototype.setValueDefaults = function (v) {
+        v.options = v.options || [];
+        v.multiple = v.multiple || false;
+        v.mode = v.mode || "edit";
+    };
+    Node.prototype.collectionValueOf = function (v) {
+        return {
+            id: v.id,
+            name: v.name + " 0",
+            type: v.type,
+            mode: v.mode,
+            options: v.options,
+            multiple: v.multiple
+        };
+    };
     Node.prototype.render = function (parent) {
         var self = this;
         if (!this.g) {
@@ -2178,7 +2261,7 @@ var Node = (function () {
             }.bind(this);
             this.rect.addEventListener("mousedown", this.rectDownHandler);
             var t = document.createElementNS(namespace, "text");
-            t.textContent = this.title;
+            t.textContent = this.options.title;
             t.classList.add("title");
             t.setAttribute("x", "5");
             t.setAttribute("y", "15");
@@ -2198,11 +2281,11 @@ var Node = (function () {
             output.addEventListener("mousedown", this.outputDownHandler);
             var outputType = document.createElementNS(namespace, "text");
             this.outputText = outputType;
-            if (this.multiple) {
-                outputType.textContent = "[" + this.outputType + "]";
+            if (this.options.type.outputMultiple) {
+                outputType.textContent = "[" + this.options.type.outputType + "]";
             }
             else {
-                outputType.textContent = this.outputType;
+                outputType.textContent = this.options.type.outputType;
             }
             outputType.classList.add("output-type");
             outputType.setAttribute("x", (this.outputOffset.x - 10).toString());
@@ -2222,27 +2305,24 @@ var Node = (function () {
             parent.appendChild(this.g);
         }
         var i = 1;
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                val.render(self.g, i++);
-            }
+        this.values.forEach(function (val) {
+            val.render(self.g, i++);
         });
     };
     ;
     Node.prototype.cloneLastValue = function () {
         var self = this;
-        if (this.multiple) {
-            var full = Object.keys(self.values).every(function (k) {
-                var val = self.values[k];
-                return !self.values.hasOwnProperty(k) || val.inputConnector !== null;
+        if (this.options.isCollection) {
+            var schema = this.options.type.schema, full = self.values.every(function (val) {
+                return val.inputConnector !== null;
             });
             if (full) {
-                var prop = JSON.parse(JSON.stringify(this.schema[this.schema.length - 1])), name_1 = prop.name + " " + this.schema.length;
-                this.schema.push(prop);
+                var prop = JSON.parse(JSON.stringify(schema[schema.length - 1])), name_1 = prop.name + " " + schema.length;
+                schema.push(prop);
                 this.nRows++;
-                self.values[name_1] = new nodevalue_1.NodeValue(name_1, prop.type, prop.mode, self, prop.options || [], prop.multiple || false);
-                self.values[name_1].render(self.g, this.schema.length);
+                var newN = new nodevalue_1.NodeValue(prop, self);
+                self.values.push(newN);
+                newN.render(self.g, schema.length);
                 this.outputOffset.y = (this.nRows * ROW_HEIGHT) - 10;
                 this.output.setAttribute("cx", (this.outputOffset.x).toString());
                 this.output.setAttribute("cy", (this.outputOffset.y).toString());
@@ -2265,30 +2345,67 @@ var Node = (function () {
             };
             con.setPath();
         });
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                val.updateConectorPosition();
-            }
+        this.values.forEach(function (val) {
+            val.updateConectorPosition();
         });
         this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
     };
     ;
+    Node.prototype.serialize = function () {
+        var self = this, model = {
+            arguments: JSON.parse(JSON.stringify(this.options)),
+            values: this.values.map(function (v) {
+                return {
+                    valueID: v.options.id,
+                    value: v.__internalGetValue(true)
+                };
+            }),
+            outputConnectors: this.outputConnectors.map(function (c) {
+                return {
+                    nodeTo: c.end2.parentNode.options.id,
+                    valueTo: c.end2.options.id
+                };
+            })
+        };
+        model.arguments.x = this.position.x;
+        model.arguments.y = this.position.y;
+        return model;
+    };
+    ;
+    Node.prototype.findValue = function (id) {
+        var i, len = this.values.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.values[i].options.id === id)
+                return this.values[i];
+        }
+        return null;
+    };
+    Node.prototype.setValues = function (vs) {
+        var self = this;
+        if (!this.options.isCollection) {
+            vs.forEach(function (v) {
+                var value = self.values.filter(function (val) {
+                    return val.options.id === v.valueID;
+                })[0];
+                if (value.__internalSetValue instanceof Function) {
+                    value.__internalSetValue(v.value);
+                }
+            });
+        }
+    };
+    ;
     Node.prototype.build = function () {
         if (!this.built) {
-            var valuesArr = [], propsOnBuild = [], self = this;
-            propsOnBuild = this.schema.filter(function (p) {
-                return p.onBuild;
+            var schema = this.options.type.schema, valuesArr = [], self = this;
+            valuesArr = this.values.map(function (v) {
+                return v.getValue();
             });
-            valuesArr = propsOnBuild.map(function (p) {
-                return self.values[p.name].getValue();
-            });
-            this.built = this.builder.apply(this, valuesArr);
+            this.built = this.options.type.builder.apply(this, valuesArr);
             return this.built;
         }
         else {
-            if (this.clonable) {
-                return this.clonefn(this.built);
+            if (this.options.type.clonable) {
+                return this.options.type.clone(this.built);
             }
             else {
                 return this.built;
@@ -2298,15 +2415,10 @@ var Node = (function () {
     ;
     Node.prototype.remove = function () {
         var self = this;
-        Object.keys(this.values).forEach(function (k) {
-            if (self.values.hasOwnProperty(k)) {
-                var val = self.values[k];
-                if (val.inputConnector) {
-                    val.inputConnector.remove();
-                }
-                ;
-            }
+        this.values.forEach(function (val) {
+            val.remove();
         });
+        this.values = null;
         [].concat(this.outputConnectors).forEach(function (con) {
             con.remove();
         });
@@ -2321,8 +2433,6 @@ var Node = (function () {
     return Node;
 }());
 exports.Node = Node;
-
-
 
 },{"./nodevalue":13}],11:[function(require,module,exports){
 "use strict";
@@ -2382,6 +2492,18 @@ var NodeCanvas = (function () {
         ;
     };
     ;
+    NodeCanvas.prototype.getTransform = function () {
+        var ctm = this.g.getCTM();
+        return {
+            pan: { x: ctm.e, y: ctm.f },
+            zoom: ctm.a
+        };
+    };
+    ;
+    NodeCanvas.prototype.setTransform = function (transform) {
+        this.zoomingSvg.zoom(transform.zoom);
+        this.zoomingSvg.pan(transform.pan);
+    };
     NodeCanvas.prototype.convertCoords = function (o) {
         var x = o.x, y = o.y;
         return {
@@ -2389,8 +2511,8 @@ var NodeCanvas = (function () {
             y: (this.ctm.b * x) + (this.ctm.d * y) + this.ctm.f //- this.offset.top
         };
     };
-    NodeCanvas.prototype.addNode = function (title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y) {
-        var n = new node_1.Node(title, builder, schema, type, clonable, clonefn, multiple, outputType, x, y), self = this;
+    NodeCanvas.prototype.addNode = function (opts) {
+        var n = new node_1.Node(opts), self = this;
         function mouseMoveHandler(evt) {
             if (self.draggingEntity) {
                 var p = self.cursorPoint(evt);
@@ -2430,18 +2552,21 @@ var NodeCanvas = (function () {
             });
             if (candidates.length > 0) {
                 var candidateDot = candidates[0].dot;
+                if (cc.end1 === candidateDot.parentValue.parentNode) {
+                    cc.remove();
+                    return;
+                }
+                if (candidateDot.parentValue.options.type !== "any" && (candidateDot.parentValue.options.type !== cc.end1.options.type.outputType ||
+                    (!candidateDot.parentValue.options.multiple && cc.end1.options.type.outputMultiple))) {
+                    cc.remove();
+                    return;
+                }
                 if (candidateDot.parentValue.inputConnector) {
                     candidateDot.parentValue.inputConnector.remove();
                 }
                 candidateDot.parentValue.inputConnector = cc;
                 cc.end2 = candidateDot.parentValue;
-                if (cc.end2.type !== "any" && (cc.end2.type !== cc.end1.outputType || cc.end1.multiple !== cc.end2.multiple)) {
-                    cc.remove();
-                }
-                if (cc.end1 === candidateDot.parentValue.parentNode) {
-                    cc.remove();
-                }
-                if (cc.end2.parentNode.multiple) {
+                if (cc.end2.parentNode.options.isCollection) {
                     cc.end2.parentNode.cloneLastValue();
                 }
                 candidateDot.parentValue.updateConectorPosition();
@@ -2457,8 +2582,8 @@ var NodeCanvas = (function () {
             self.ctm = self.g.getCTM().inverse();
             self.offset = self.svg.getBoundingClientRect();
             var p1 = {
-                x: entity.position.x + parseInt(entity.output.getAttribute("cx")),
-                y: entity.position.y + parseInt(entity.output.getAttribute("cy"))
+                x: entity.position.x + parseInt(entity.outputOffset.x.toString()),
+                y: entity.position.y + parseInt(entity.outputOffset.y.toString())
             };
             self.currentConnector = new nodeconnector_1.NodeConnector(p1, entity);
             entity.outputConnectors.push(self.currentConnector);
@@ -2494,6 +2619,7 @@ var NodeCanvas = (function () {
             self.g.removeChild(n.g);
         };
         n.render(self.g);
+        return n;
     };
     ;
     NodeCanvas.prototype.init = function () {
@@ -2504,12 +2630,51 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.serialize = function () {
+        return this.nodes.map(function (n) {
+            return n.serialize();
+        });
+    };
+    NodeCanvas.prototype.findNode = function (id) {
+        var i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id)
+                return this.nodes[i];
+        }
+        return null;
+    };
+    NodeCanvas.prototype.parse = function (nodes) {
+        var self = this;
+        nodes.forEach(function (nm) {
+            var n = self.addNode(nm.arguments);
+            n.setValues(nm.values);
+        });
+        nodes.forEach(function (nm) {
+            var n = self.findNode(nm.arguments.id);
+            nm.outputConnectors.forEach(function (cn) {
+                var end2 = self.findNode(cn.nodeTo);
+                var p1 = {
+                    x: n.position.x + parseInt(n.outputOffset.x.toString()),
+                    y: n.position.y + parseInt(n.outputOffset.y.toString())
+                };
+                var conn = new nodeconnector_1.NodeConnector(p1, n);
+                n.outputConnectors.push(conn);
+                self.paths.appendChild(conn.path);
+                if (end2.options.isCollection) {
+                    end2.cloneLastValue();
+                }
+                var val = end2.findValue(cn.valueTo);
+                val.inputConnector = conn;
+                conn.end2 = val;
+                val.updateConectorPosition();
+            });
+        });
+    };
     NodeCanvas.prototype.clear = function () {
-        //Alert the user about the action being irreversible
-        var nds = [].concat(this.nodes);
-        nds.forEach(function (node) {
+        [].concat(this.nodes).forEach(function (node) {
             node.remove();
         });
+        this.paths.innerHTML = "";
     };
     ;
     NodeCanvas.prototype.getTerminalNodes = function () {
@@ -2518,11 +2683,14 @@ var NodeCanvas = (function () {
         });
     };
     ;
+    NodeCanvas.prototype.getOfType = function (type) {
+        return this.nodes.filter(function (n) {
+            return n.options.type.id === type;
+        });
+    };
     return NodeCanvas;
 }());
 exports.NodeCanvas = NodeCanvas;
-
-
 
 },{"./node":10,"./nodeconnector":12,"svg-pan-zoom":1}],12:[function(require,module,exports){
 "use strict";
@@ -2561,7 +2729,7 @@ var NodeConnector = (function () {
             this.end2.inputConnector = null;
         }
         if (this.path) {
-            this.path.parentNode.removeChild(this.path);
+            this.path.remove();
             this.path = null;
         }
     };
@@ -2574,20 +2742,15 @@ var NodeConnector = (function () {
 }());
 exports.NodeConnector = NodeConnector;
 
-
-
 },{}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var NodeValue = (function () {
-    function NodeValue(name, type, mode, node, options, multiple) {
-        this.name = name;
-        this.type = type;
-        this.mode = mode;
-        this.multiple = multiple;
-        this.options = options;
+    function NodeValue(opts, node) {
+        this.popup = null;
+        this.options = opts;
         this.inputConnector = null;
         this.__internalGetValue = null;
         this.svgEntity = null;
@@ -2604,68 +2767,45 @@ var NodeValue = (function () {
             };
             ent.setAttribute("transform", "translate(" + this.gOffset.x + ", " + this.gOffset.y + ")");
             ent.setAttribute("class", "row");
-            if (this.mode === "edit") {
+            if (this.options.mode === "edit") {
                 var rect = document.createElementNS(namespace, "rect"), fo = document.createElementNS(namespace, "foreignObject"), name_1 = document.createElementNS(namespace, "text"), div = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                name_1.textContent = this.name;
+                name_1.textContent = this.options.name;
                 name_1.setAttribute("x", "10");
                 name_1.setAttribute("y", "6");
                 rect.setAttribute("x", "1");
                 div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
                 var input_1 = document.createElement("input");
-                switch (this.type) {
+                switch (this.options.type) {
                     case "range":
-                        this.__internalGetValue = function () {
-                            input_1.min = this.options[0];
-                            input_1.max = this.options[1];
-                            if (input_1.value <= input_1.max && input_1.value >= input_1.min) {
-                                return input_1.value;
-                            }
-                            else {
-                                // error range?
-                            }
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
+                        input_1.min = this.options[0];
+                        input_1.max = this.options[1];
                     case "text":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "number":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "email":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "date":
-                        this.__internalGetValue = function () {
-                            return input_1.value;
-                        };
-                        input_1.type = this.type;
-                        div.appendChild(input_1);
-                        break;
                     case "color":
                         this.__internalGetValue = function () {
-                            console.log(input_1.value);
                             return input_1.value;
                         };
-                        input_1.type = this.type;
+                        this.__internalSetValue = function (v) {
+                            input_1.value = v;
+                        };
+                        input_1.type = this.options.type;
+                        div.appendChild(input_1);
+                        break;
+                    case "boolean":
+                        this.__internalGetValue = function () {
+                            return input_1.checked;
+                        };
+                        this.__internalSetValue = function (v) {
+                            input_1.checked = v;
+                        };
+                        input_1.type = "checkbox";
                         div.appendChild(input_1);
                         break;
                     case "select":
                         var div_select_1 = document.createElement("select");
-                        this.options.forEach(function (op) {
+                        this.options.options.forEach(function (op) {
                             var div_option = document.createElement("option");
                             div_option.textContent = op.show.toString();
                             div_option.setAttribute("value", op.save);
@@ -2673,6 +2813,9 @@ var NodeValue = (function () {
                         });
                         this.__internalGetValue = function () {
                             return div_select_1.value;
+                        };
+                        this.__internalSetValue = function (v) {
+                            input_1.value = v;
                         };
                         div.appendChild(div_select_1);
                         break;
@@ -2682,6 +2825,7 @@ var NodeValue = (function () {
                         btn.textContent = "*Edit";
                         var popup_1 = document.createElement("div");
                         popup_1.classList.add("codenodes-popup");
+                        this.popup = popup_1;
                         var popupLayer = document.createElement("div");
                         popupLayer.classList.add("layer");
                         var popupContent = document.createElement("div");
@@ -2708,6 +2852,9 @@ var NodeValue = (function () {
                         this.__internalGetValue = function () {
                             return popupTextArea_1.textContent;
                         };
+                        this.__internalSetValue = function (v) {
+                            popupTextArea_1.textContent = v;
+                        };
                         document.body.appendChild(popup_1);
                         div.appendChild(btn);
                         break;
@@ -2718,7 +2865,7 @@ var NodeValue = (function () {
                 ent.appendChild(name_1);
                 ent.appendChild(fo);
             }
-            if (this.mode === "in") {
+            if (this.options.mode === "in") {
                 var name_2 = document.createElementNS(namespace, "text"), type = document.createElementNS(namespace, "text"), dot = document.createElementNS(namespace, "circle");
                 dot.setAttribute("cx", "-1");
                 dot.setAttribute("cy", "16");
@@ -2731,21 +2878,27 @@ var NodeValue = (function () {
                     evt.stopPropagation();
                 });
                 dot["parentValue"] = this;
-                name_2.textContent = this.name;
+                name_2.textContent = this.options.name;
                 name_2.setAttribute("x", "10");
                 name_2.setAttribute("y", "8");
-                if (this.multiple) {
-                    type.textContent = "[" + this.type + "]";
+                if (this.options.multiple) {
+                    type.textContent = "[" + this.options.type + "]";
                 }
                 else {
-                    type.textContent = this.type;
+                    type.textContent = this.options.type;
                 }
                 type.classList.add("value-type");
                 type.setAttribute("x", "10");
                 type.setAttribute("y", "25");
-                this.__internalGetValue = function () {
-                    if (this.inputConnector) {
-                        return this.inputConnector.end1.build();
+                this.__internalGetValue = function (serializing) {
+                    if (!serializing && self.inputConnector) {
+                        var built = self.inputConnector.end1.build();
+                        if (self.options.multiple && !self.inputConnector.end1.options.type.outputMultiple) {
+                            return [built];
+                        }
+                        else {
+                            return built;
+                        }
                     }
                     return undefined;
                 };
@@ -2758,6 +2911,12 @@ var NodeValue = (function () {
         }
     };
     ;
+    NodeValue.prototype.getSerializedValue = function () {
+        if (this.options.mode === "edit" && this.__internalGetValue instanceof Function) {
+            return this.__internalGetValue();
+        }
+        return null;
+    };
     NodeValue.prototype.getDotPosition = function () {
         return {
             x: this.parentNode.position.x + this.gOffset.x - 1,
@@ -2765,6 +2924,18 @@ var NodeValue = (function () {
         };
     };
     ;
+    NodeValue.prototype.remove = function () {
+        if (this.inputConnector) {
+            this.inputConnector.remove();
+            this.inputConnector = null;
+        }
+        this.svgEntity.remove();
+        this.svgEntity = null;
+        if (this.popup) {
+            document.body.removeChild(this.popup);
+        }
+        this.parentNode = null;
+    };
     NodeValue.prototype.updateConectorPosition = function () {
         if (this.inputConnector) {
             this.inputConnector.ep = this.getDotPosition();
@@ -2780,8 +2951,6 @@ var NodeValue = (function () {
     return NodeValue;
 }());
 exports.NodeValue = NodeValue;
-
-
 
 },{}]},{},[8])(8)
 });
