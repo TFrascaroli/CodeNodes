@@ -5,6 +5,7 @@ var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
     function Node(opts) {
+        this.builtWith = [];
         var self = this;
         this.options = opts;
         this.values = [];
@@ -39,6 +40,12 @@ var Node = (function () {
             options: v.options,
             multiple: v.multiple
         };
+    };
+    Node.prototype.dropPreBuilt = function () {
+        if (this.options.type.ondrop instanceof Function) {
+            this.options.type.ondrop(this.built);
+            this.built = null;
+        }
     };
     Node.prototype.render = function (parent) {
         var self = this;
@@ -195,13 +202,24 @@ var Node = (function () {
         }
     };
     ;
+    Node.prototype.checkBuiltWithEquals = function (valuesArr) {
+        if (this.builtWith.length === 0)
+            return false;
+        return this.builtWith.every(function (v, i) {
+            return v === valuesArr[i];
+        });
+    };
     Node.prototype.build = function () {
-        if (!this.built) {
-            var schema = this.options.type.schema, valuesArr = [], self = this;
-            valuesArr = this.values.map(function (v) {
-                return v.getValue();
-            });
+        var schema = this.options.type.schema, valuesArr = [], self = this;
+        valuesArr = this.values.map(function (v) {
+            return v.getValue();
+        });
+        if (!this.checkBuiltWithEquals(valuesArr) && this.built) {
+            this.dropPreBuilt();
+        }
+        if (!this.built || !this.checkBuiltWithEquals(valuesArr)) {
             this.built = this.options.type.builder.apply(this, valuesArr);
+            this.builtWith = valuesArr;
             return this.built;
         }
         else {

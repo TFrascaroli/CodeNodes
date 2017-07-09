@@ -48,7 +48,7 @@ var NodeValue = (function () {
                         input_1.type = this.options.type;
                         div.appendChild(input_1);
                         break;
-                    case "boolean":
+                    case "checkbox":
                         this.__internalGetValue = function () {
                             return input_1.checked;
                         };

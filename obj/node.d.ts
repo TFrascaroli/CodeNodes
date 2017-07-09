@@ -22,9 +22,11 @@ export declare class Node {
     outputDownHandler: EventListenerOrEventListenerObject;
     private close;
     onremove: Function;
+    private builtWith;
     constructor(opts: INodeArguments);
     private setValueDefaults(v);
     private collectionValueOf(v);
+    dropPreBuilt(): void;
     render(parent: SVGElement): void;
     cloneLastValue(): void;
     move(x: any, y: any): void;
@@ -34,6 +36,7 @@ export declare class Node {
         valueID: number;
         value: any;
     }[]): void;
+    checkBuiltWithEquals(valuesArr: any): boolean;
     build(): any;
     remove(): void;
 }

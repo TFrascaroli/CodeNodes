@@ -580,13 +580,11 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
@@ -594,35 +592,28 @@ SvgPanZoom.prototype.setupHandlers = function() {
 
     // Mouse up group
   , mouseup: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchend: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
   , touchmove: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseMove(evt);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchleave: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   , touchcancel: function(evt) {
-		if(!(evt.target instanceof SVGSVGElement)) return;
       return that.handleMouseUp(evt);
     }
   }
@@ -2204,6 +2195,7 @@ var namespace = "http://www.w3.org/2000/svg";
 var ROW_HEIGHT = 38;
 var Node = (function () {
     function Node(opts) {
+        this.builtWith = [];
         var self = this;
         this.options = opts;
         this.values = [];
@@ -2238,6 +2230,12 @@ var Node = (function () {
             options: v.options,
             multiple: v.multiple
         };
+    };
+    Node.prototype.dropPreBuilt = function () {
+        if (this.options.type.ondrop instanceof Function) {
+            this.options.type.ondrop(this.built);
+            this.built = null;
+        }
     };
     Node.prototype.render = function (parent) {
         var self = this;
@@ -2394,13 +2392,24 @@ var Node = (function () {
         }
     };
     ;
+    Node.prototype.checkBuiltWithEquals = function (valuesArr) {
+        if (this.builtWith.length === 0)
+            return false;
+        return this.builtWith.every(function (v, i) {
+            return v === valuesArr[i];
+        });
+    };
     Node.prototype.build = function () {
-        if (!this.built) {
-            var schema = this.options.type.schema, valuesArr = [], self = this;
-            valuesArr = this.values.map(function (v) {
-                return v.getValue();
-            });
+        var schema = this.options.type.schema, valuesArr = [], self = this;
+        valuesArr = this.values.map(function (v) {
+            return v.getValue();
+        });
+        if (!this.checkBuiltWithEquals(valuesArr) && this.built) {
+            this.dropPreBuilt();
+        }
+        if (!this.built || !this.checkBuiltWithEquals(valuesArr)) {
             this.built = this.options.type.builder.apply(this, valuesArr);
+            this.builtWith = valuesArr;
             return this.built;
         }
         else {
@@ -2793,7 +2802,7 @@ var NodeValue = (function () {
                         input_1.type = this.options.type;
                         div.appendChild(input_1);
                         break;
-                    case "boolean":
+                    case "checkbox":
                         this.__internalGetValue = function () {
                             return input_1.checked;
                         };
