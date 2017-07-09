@@ -5,9 +5,10 @@ export interface ICodeNodesType {
     name: string;
     description: string;
     builder: Function;
-    clone: Function;
-    clonable: boolean;
+    clone?: Function;
+    clonable?: boolean;
     outputType: string;
-    outputMultiple: boolean;
+    outputMultiple?: boolean;
     schema: Array<schema>;
+    ondrop?: Function;
 };

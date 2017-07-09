@@ -29,6 +29,7 @@ export class Node {
     public outputDownHandler: EventListenerOrEventListenerObject;
     private close: EventListenerOrEventListenerObject;
     public onremove: Function;
+    private builtWith: Array<any> = [];
 
 
     constructor(opts: INodeArguments) {
@@ -70,7 +71,10 @@ export class Node {
     }
 
     dropPreBuilt () {
-        this.built = null;
+        if (this.options.type.ondrop instanceof Function) {
+            this.options.type.ondrop(this.built);
+            this.built = null;
+        }
     }
 
     render(parent: SVGElement) {
@@ -240,15 +244,26 @@ export class Node {
         }
     };
 
+    checkBuiltWithEquals (valuesArr): boolean {
+        if (this.builtWith.length === 0) return false;
+        return this.builtWith.every(function (v, i) {
+            return v === valuesArr[i];
+        });
+    }
+
     build() {
-        if (!this.built) {
-			var schema = this.options.type.schema,
-                valuesArr = [],
-				self = this;
-			valuesArr = this.values.map(function(v) {
-				return v.getValue();
-			});
+        var schema = this.options.type.schema,
+            valuesArr = [],
+            self = this;
+        valuesArr = this.values.map(function(v) {
+            return v.getValue();
+        });
+        if (!this.checkBuiltWithEquals(valuesArr) && this.built) {
+            this.dropPreBuilt();
+        }
+        if (!this.built || !this.checkBuiltWithEquals(valuesArr)) {
 			this.built =  this.options.type.builder.apply(this, valuesArr);
+            this.builtWith = valuesArr;
 			return this.built;
 		} else {
 			if (this.options.type.clonable) {
