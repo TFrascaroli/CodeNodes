@@ -1,7 +1,7 @@
-import {INodeArguments} from "./INodeArguments";
+import {INodeArgumentsReduced} from "./INodeArgumentsReduced";
 
 export interface INodeModel {
-    arguments: INodeArguments,
+    arguments: INodeArgumentsReduced,
     values: [{
         valueID: number,
         value: any

@@ -3,6 +3,7 @@ import {Point} from "./point";
 import {Node} from "./node";
 import {NodeConnector} from "./nodeconnector";
 import {INodeArguments} from "./interfaces/INodeArguments";
+import {ICodeNodesType} from "./interfaces/ICodeNodesType";
 import {INodeModel} from "./interfaces/INodeModel";
 
 const namespace = "http://www.w3.org/2000/svg";
@@ -230,11 +231,30 @@ export class NodeCanvas {
         return null;
     }
 
-    parse (nodes: INodeModel[]) {
+    findType (id: string, types: ICodeNodesType[]): ICodeNodesType {
+        let i = 0, len = types.length;
+        for (;i < len; i++) {
+            if (types[i].id === id) return types[i];
+        }
+        return null;
+    }
+
+    parse (nodes: INodeModel[], types: ICodeNodesType[]) {
         let self = this;
         nodes.forEach(nm => {
-            let n = self.addNode(nm.arguments);
-            n.setValues(nm.values);
+            let t = this.findType(nm.arguments.type, types);
+            if (t) {
+                let args: INodeArguments = {
+                    id: nm.arguments.id,
+                    title: nm.arguments.title,
+                    type: t,
+                    isCollection: nm.arguments.isCollection,
+                    x: nm.arguments.x,
+                    y: nm.arguments.y
+                };
+                let n = self.addNode(args);
+                n.setValues(nm.values);
+            }
         });
 
         nodes.forEach(nm => {

@@ -2032,7 +2032,7 @@ var CodeNodes = (function () {
     CodeNodes.prototype.parse = function (model) {
         var self = this;
         this.canvas.setTransform(model.transform);
-        self.canvas.parse(model.nodes);
+        self.canvas.parse(model.nodes, this.types);
     };
     CodeNodes.prototype.getOfType = function (type) {
         return this.canvas.getOfType(type);
@@ -2365,6 +2365,7 @@ var Node = (function () {
                 };
             })
         };
+        model.arguments.type = this.options.type.id;
         model.arguments.x = this.position.x;
         model.arguments.y = this.position.y;
         return model;
@@ -2652,11 +2653,31 @@ var NodeCanvas = (function () {
         }
         return null;
     };
-    NodeCanvas.prototype.parse = function (nodes) {
+    NodeCanvas.prototype.findType = function (id, types) {
+        var i = 0, len = types.length;
+        for (; i < len; i++) {
+            if (types[i].id === id)
+                return types[i];
+        }
+        return null;
+    };
+    NodeCanvas.prototype.parse = function (nodes, types) {
+        var _this = this;
         var self = this;
         nodes.forEach(function (nm) {
-            var n = self.addNode(nm.arguments);
-            n.setValues(nm.values);
+            var t = _this.findType(nm.arguments.type, types);
+            if (t) {
+                var args = {
+                    id: nm.arguments.id,
+                    title: nm.arguments.title,
+                    type: t,
+                    isCollection: nm.arguments.isCollection,
+                    x: nm.arguments.x,
+                    y: nm.arguments.y
+                };
+                var n = self.addNode(args);
+                n.setValues(nm.values);
+            }
         });
         nodes.forEach(function (nm) {
             var n = self.findNode(nm.arguments.id);

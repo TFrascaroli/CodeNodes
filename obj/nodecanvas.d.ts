@@ -1,6 +1,7 @@
 import { Point } from "./point";
 import { Node } from "./node";
 import { INodeArguments } from "./interfaces/INodeArguments";
+import { ICodeNodesType } from "./interfaces/ICodeNodesType";
 import { INodeModel } from "./interfaces/INodeModel";
 export declare class NodeCanvas {
     private pt;
@@ -42,7 +43,8 @@ export declare class NodeCanvas {
     init(): void;
     serialize(): INodeModel[];
     findNode(id: number): Node;
-    parse(nodes: INodeModel[]): void;
+    findType(id: string, types: ICodeNodesType[]): ICodeNodesType;
+    parse(nodes: INodeModel[], types: ICodeNodesType[]): void;
     clear(): void;
     getTerminalNodes(): Node[];
     getOfType(type: string): Node[];

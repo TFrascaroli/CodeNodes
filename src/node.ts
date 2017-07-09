@@ -217,6 +217,7 @@ export class Node {
                 };
             })
         };
+        model.arguments.type = this.options.type.id;
         model.arguments.x = this.position.x;
         model.arguments.y = this.position.y;
         return model;

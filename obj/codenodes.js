@@ -147,7 +147,7 @@ var CodeNodes = (function () {
     CodeNodes.prototype.parse = function (model) {
         var self = this;
         this.canvas.setTransform(model.transform);
-        self.canvas.parse(model.nodes);
+        self.canvas.parse(model.nodes, this.types);
     };
     CodeNodes.prototype.getOfType = function (type) {
         return this.canvas.getOfType(type);

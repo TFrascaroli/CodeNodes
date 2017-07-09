@@ -156,7 +156,7 @@ export class CodeNodes {
     parse (model: ICodeNodesModel) {
         let self = this;
         this.canvas.setTransform(model.transform);
-        self.canvas.parse(model.nodes);
+        self.canvas.parse(model.nodes, this.types);
     }
 
     getOfType(type: string): Node[] {
