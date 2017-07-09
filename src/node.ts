@@ -69,6 +69,10 @@ export class Node {
         };
     }
 
+    dropPreBuilt () {
+        this.built = null;
+    }
+
     render(parent: SVGElement) {
         let self = this;
         if (!this.g) {
