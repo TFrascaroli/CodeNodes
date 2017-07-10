@@ -254,6 +254,7 @@
   padding: 10px;
   color: #dedede;
   background-color: #464646;
+  overflow: auto;
 }
 .codenodes-popup .wraper .content .ok {
   width: 40px;

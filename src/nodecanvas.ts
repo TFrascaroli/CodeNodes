@@ -213,7 +213,9 @@ export class NodeCanvas {
         this.svg.setAttribute("viewBox", "0 0 " + this.svg.clientWidth + " " + this.svg.clientHeight);
         this.zoomingSvg = svgPanZoom(this.svg, {
             zoomScaleSensitivity: 0.4,
-            dblClickZoomEnabled: false
+            dblClickZoomEnabled: false,
+            eventsListenerElement: this.svg,
+            restrictEventsListenerEvent: true
         });
     };
 

@@ -40,6 +40,6 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "svg-pan-zoom": "^3.5.1"
+    "svg-pan-zoom": "git://github.com/TFrascaroli/svg-pan-zoom"
   }
 }

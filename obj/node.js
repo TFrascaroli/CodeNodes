@@ -44,8 +44,8 @@ var Node = (function () {
     Node.prototype.dropPreBuilt = function () {
         if (this.options.type.ondrop instanceof Function) {
             this.options.type.ondrop(this.built);
-            this.built = null;
         }
+        this.built = null;
     };
     Node.prototype.render = function (parent) {
         var self = this;
