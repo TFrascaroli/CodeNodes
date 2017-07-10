@@ -73,8 +73,8 @@ export class Node {
     dropPreBuilt () {
         if (this.options.type.ondrop instanceof Function) {
             this.options.type.ondrop(this.built);
-            this.built = null;
         }
+        this.built = null;
     }
 
     render(parent: SVGElement) {
