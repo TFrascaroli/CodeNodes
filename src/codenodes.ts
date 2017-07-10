@@ -106,11 +106,24 @@ export class CodeNodes {
         }
     };
     private collectionBuilder () {
-        function flatten(arr) {
-            return arr.reduce(function (flat, toFlatten) {
-            return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
-            }, []);
+        function flatten (arrs) {
+	        var ret = [];
+            if (arrs.length) {
+                arrs.forEach(e => {
+                    flatten(e).forEach(en => {
+                        ret.push(en);
+                    });
+                });
+            } else {
+                ret.push(arrs);
+            }
+	        return ret;
         }
+        // function flatten(arr) {
+        //     return arr.reduce(function (flat, toFlatten) {
+        //     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+        //     }, []);
+        // }
         return flatten(Array.prototype.slice.call([], arguments)).filter(function (v) {
             return typeof v !== "undefined";
         });
