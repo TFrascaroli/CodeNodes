@@ -1922,7 +1922,10 @@ var CodeNodes = (function () {
         this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
-        this.types = types.sort(function (a, b) {
+        this.types = types.map(function (t) {
+            t.outputType = t.outputType || t.id;
+            return t;
+        }).sort(function (a, b) {
             return b.name.localeCompare(a.name);
         }).reverse();
         this.menu = new menu_1.CodeNodesMenu(this);
@@ -1984,9 +1987,7 @@ var CodeNodes = (function () {
     CodeNodes.prototype.addNode = function (name, type) {
         var t = this.findType(type);
         if (t) {
-            var outputType = t.outputType || type;
-            var ot = this.findType(outputType);
-            t["outputType"] = outputType;
+            var ot = this.findType(t.outputType);
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 this.canvas.addNode({
@@ -1999,7 +2000,7 @@ var CodeNodes = (function () {
                 });
             }
             else {
-                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+                console.log("There is no type " + t.outputType + " registered. Can not assign output type.");
             }
         }
         else {
@@ -2028,9 +2029,7 @@ var CodeNodes = (function () {
     CodeNodes.prototype.addCollection = function (name, ofType) {
         var t = this.findType(ofType);
         if (t) {
-            var outputType = t.outputType || ofType;
-            var ot = this.findType(outputType);
-            t["outputType"] = outputType;
+            var ot = this.findType(t.outputType);
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
@@ -2044,7 +2043,7 @@ var CodeNodes = (function () {
                 });
             }
             else {
-                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+                console.log("There is no type " + t.outputType + " registered. Can not assign output type.");
             }
         }
         else {

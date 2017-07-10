@@ -20,7 +20,10 @@ export class CodeNodes {
     constructor (types: ICodeNodesType[]) {
         let self = this;
         this.canvas = new NodeCanvas();
-        this.types = types.sort((a, b) => {
+        this.types = types.map(t => {
+            t.outputType = t.outputType || t.id;
+            return t;
+        }).sort((a, b) => {
             return b.name.localeCompare(a.name);
         }).reverse();
         this.menu = new CodeNodesMenu(this);
@@ -84,9 +87,7 @@ export class CodeNodes {
     public addNode (name: string, type: string) {
         let t: ICodeNodesType = this.findType(type);
         if (t) {
-            let outputType = t.outputType || type;
-            let ot: ICodeNodesType = this.findType(outputType);
-            t["outputType"] = outputType;
+            let ot: ICodeNodesType = this.findType(t.outputType);
             if (ot) {
                 let p = this.menuPoint || {x: 10, y: 10};
                 this.canvas.addNode({
@@ -98,7 +99,7 @@ export class CodeNodes {
                     y: p.y
                 });
             } else {
-                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+                console.log("There is no type " + t.outputType + " registered. Can not assign output type.");
             }
         } else {
             console.log("There is no type " + type + " registered");
@@ -123,9 +124,7 @@ export class CodeNodes {
     public addCollection (name, ofType: string) {
         let t: ICodeNodesType = this.findType(ofType);
         if (t) {
-            let outputType = t.outputType || ofType;
-            let ot: ICodeNodesType = this.findType(outputType);
-            t["outputType"] = outputType;
+            let ot: ICodeNodesType = this.findType(t.outputType);
             if (ot) {
 
                 let p = this.menuPoint || {x: 10, y: 10};
@@ -139,7 +138,7 @@ export class CodeNodes {
                     y: p.y
                 });
             } else {
-                console.log("There is no type " + outputType + " registered. Can not assign output type.");
+                console.log("There is no type " + t.outputType + " registered. Can not assign output type.");
             }
         } else {
             console.log("There is no type " + ofType + " registered");
