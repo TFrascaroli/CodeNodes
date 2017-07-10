@@ -99,7 +99,7 @@ var CodeNodes = (function () {
                 return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
             }, []);
         }
-        return flatten(arguments).filter(function (v) {
+        return flatten(Array.prototype.slice.call([], arguments)).filter(function (v) {
             return typeof v !== "undefined";
         });
     };
