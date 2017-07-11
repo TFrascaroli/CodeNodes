@@ -108,7 +108,7 @@ export class CodeNodes {
     private collectionBuilder () {
         function flatten (arrs) {
 	        var ret = [];
-            if (arrs.length) {
+            if (typeof arrs !== "undefined" && arrs.length) {
                 arrs.forEach(e => {
                     flatten(e).forEach(en => {
                         ret.push(en);
@@ -124,7 +124,7 @@ export class CodeNodes {
         //     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
         //     }, []);
         // }
-        return flatten(Array.prototype.slice.call([], arguments)).filter(function (v) {
+        return flatten(Array.prototype.slice.call(arguments)).filter(function (v) {
             return typeof v !== "undefined";
         });
     };
