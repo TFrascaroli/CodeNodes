@@ -2011,7 +2011,7 @@ var CodeNodes = (function () {
     CodeNodes.prototype.collectionBuilder = function () {
         function flatten(arrs) {
             var ret = [];
-            if (arrs.length) {
+            if (typeof arrs !== "undefined" && arrs.length) {
                 arrs.forEach(function (e) {
                     flatten(e).forEach(function (en) {
                         ret.push(en);
@@ -2028,7 +2028,7 @@ var CodeNodes = (function () {
         //     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
         //     }, []);
         // }
-        return flatten(Array.prototype.slice.call([], arguments)).filter(function (v) {
+        return flatten(Array.prototype.slice.call(arguments)).filter(function (v) {
             return typeof v !== "undefined";
         });
     };
