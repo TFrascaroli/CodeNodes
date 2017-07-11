@@ -268,7 +268,7 @@ export class Node {
 			return this.built;
 		} else {
 			if (this.options.type.clonable) {
-				return this.options.type.clone(this.built);
+				return this.options.type.clone(this.built, this.options.type);
 			} else {
 				return this.built;
 			}
