@@ -286,8 +286,10 @@ export class NodeCanvas {
     clear() {
 		[].concat(this.nodes).forEach(function (node) {
 			node.remove();
-		});
-        this.paths.innerHTML = "";
+        });
+        if (this.paths) {
+            this.paths.innerHTML = "";
+        }
     };
 
     getTerminalNodes () {

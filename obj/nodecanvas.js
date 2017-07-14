@@ -259,7 +259,9 @@ var NodeCanvas = (function () {
         [].concat(this.nodes).forEach(function (node) {
             node.remove();
         });
-        this.paths.innerHTML = "";
+        if (this.paths) {
+            this.paths.innerHTML = "";
+        }
     };
     ;
     NodeCanvas.prototype.getTerminalNodes = function () {
