@@ -15,6 +15,7 @@ export class CodeNodes {
     public menu: CodeNodesMenu;
     private menuPoint: Point;
     private nodesCount: number = 0;
+    public onclear: Function;
 
 
     constructor (types: ICodeNodesType[]) {
@@ -57,6 +58,9 @@ export class CodeNodes {
 
     clear () {
         this.canvas.clear();
+        if (this.onclear instanceof Function) {
+            this.onclear();
+        }
     }
 
     findType (tID: string): ICodeNodesType {

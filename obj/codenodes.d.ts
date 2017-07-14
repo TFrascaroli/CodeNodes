@@ -9,6 +9,7 @@ export declare class CodeNodes {
     menu: CodeNodesMenu;
     private menuPoint;
     private nodesCount;
+    onclear: Function;
     constructor(types: ICodeNodesType[]);
     setTypes(types: ICodeNodesType[]): void;
     getSVG(): SVGSVGElement;

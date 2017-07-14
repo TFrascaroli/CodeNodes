@@ -8,6 +8,7 @@ declare module 'codenodes' {
     import { ICodeNodesModel } from "codenodes/interfaces/ICodeNodesModel";
     export class CodeNodes {
         canvas: NodeCanvas;
+        onclear: Function;
         types: ICodeNodesType[];
         menu: CodeNodesMenu;
         constructor(types: ICodeNodesType[]);

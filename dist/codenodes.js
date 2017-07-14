@@ -1958,6 +1958,9 @@ var CodeNodes = (function () {
     ;
     CodeNodes.prototype.clear = function () {
         this.canvas.clear();
+        if (this.onclear instanceof Function) {
+            this.onclear();
+        }
     };
     CodeNodes.prototype.findType = function (tID) {
         var i = 0, len = this.types.length;
