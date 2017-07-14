@@ -15,6 +15,7 @@ declare module 'codenodes' {
         init(): void;
         center(): void;
         clear(): void;
+        setTypes(types: ICodeNodesType[]): void;
         findType(tID: string): ICodeNodesType;
         addNode(name: string, type: string): void;
         addCollection(name: any, ofType: string): void;

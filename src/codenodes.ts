@@ -20,12 +20,7 @@ export class CodeNodes {
     constructor (types: ICodeNodesType[]) {
         let self = this;
         this.canvas = new NodeCanvas();
-        this.types = types.map(t => {
-            t.outputType = t.outputType || t.id;
-            return t;
-        }).sort((a, b) => {
-            return b.name.localeCompare(a.name);
-        }).reverse();
+        this.setTypes(types);
         this.menu = new CodeNodesMenu(this);
         this.canvas.ondblclick = function (p: Point, rawP: Point) {
             self.menuPoint = p;
@@ -35,6 +30,16 @@ export class CodeNodes {
             self.menu.close();
         }
     };
+
+    setTypes (types: ICodeNodesType[]) {
+        this.clear();
+        this.types = types.map(t => {
+            t.outputType = t.outputType || t.id;
+            return t;
+        }).sort((a, b) => {
+            return b.name.localeCompare(a.name);
+        }).reverse();
+    }
 
     getSVG () {
         this.canvas.render();

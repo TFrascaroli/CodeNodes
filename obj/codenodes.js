@@ -7,12 +7,7 @@ var CodeNodes = (function () {
         this.nodesCount = 0;
         var self = this;
         this.canvas = new nodecanvas_1.NodeCanvas();
-        this.types = types.map(function (t) {
-            t.outputType = t.outputType || t.id;
-            return t;
-        }).sort(function (a, b) {
-            return b.name.localeCompare(a.name);
-        }).reverse();
+        this.setTypes(types);
         this.menu = new menu_1.CodeNodesMenu(this);
         this.canvas.ondblclick = function (p, rawP) {
             self.menuPoint = p;
@@ -23,6 +18,15 @@ var CodeNodes = (function () {
         };
     }
     ;
+    CodeNodes.prototype.setTypes = function (types) {
+        this.clear();
+        this.types = types.map(function (t) {
+            t.outputType = t.outputType || t.id;
+            return t;
+        }).sort(function (a, b) {
+            return b.name.localeCompare(a.name);
+        }).reverse();
+    };
     CodeNodes.prototype.getSVG = function () {
         this.canvas.render();
         return this.canvas.svg;

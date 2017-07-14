@@ -10,6 +10,7 @@ export declare class CodeNodes {
     private menuPoint;
     private nodesCount;
     constructor(types: ICodeNodesType[]);
+    setTypes(types: ICodeNodesType[]): void;
     getSVG(): SVGSVGElement;
     init(): void;
     center(): void;
