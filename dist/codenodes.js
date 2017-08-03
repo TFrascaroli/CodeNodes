@@ -2390,6 +2390,11 @@ var Node = (function () {
                 this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
                 return newN;
             }
+            else {
+                return self.values.filter(function (val) {
+                    return val.inputConnector === null;
+                })[0];
+            }
         }
     };
     ;

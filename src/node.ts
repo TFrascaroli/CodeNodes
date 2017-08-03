@@ -178,6 +178,10 @@ export class Node {
                 this.outputText.setAttribute("y", (this.outputOffset.y).toString());
                 this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
                 return newN;
+            } else {
+                return self.values.filter(val => {
+                    return val.inputConnector === null;
+                })[0];
             }
         }
     };
