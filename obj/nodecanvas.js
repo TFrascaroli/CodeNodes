@@ -219,6 +219,7 @@ var NodeCanvas = (function () {
     NodeCanvas.prototype.parse = function (nodes, types) {
         var _this = this;
         var self = this;
+        this.clear();
         nodes.forEach(function (nm) {
             var t = _this.findType(nm.arguments.type, types);
             if (t) {

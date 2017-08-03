@@ -243,6 +243,7 @@ export class NodeCanvas {
 
     parse (nodes: INodeModel[], types: ICodeNodesType[]) {
         let self = this;
+        this.clear();
         nodes.forEach(nm => {
             let t = this.findType(nm.arguments.type, types);
             if (t) {
