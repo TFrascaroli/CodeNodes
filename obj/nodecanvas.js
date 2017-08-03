@@ -213,10 +213,13 @@ var NodeCanvas = (function () {
                 var conn = new nodeconnector_1.NodeConnector(p1, n);
                 n.outputConnectors.push(conn);
                 self.paths.appendChild(conn.path);
+                var val;
                 if (end2.options.isCollection) {
-                    end2.cloneLastValue();
+                    val = end2.cloneLastValue();
                 }
-                var val = end2.findValue(cn.valueTo);
+                else {
+                    val = end2.findValue(cn.valueTo);
+                }
                 val.inputConnector = conn;
                 conn.end2 = val;
                 val.updateConectorPosition();

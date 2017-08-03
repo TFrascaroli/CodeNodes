@@ -177,6 +177,7 @@ export class Node {
                 this.output.setAttribute("cy", (this.outputOffset.y).toString());
                 this.outputText.setAttribute("y", (this.outputOffset.y).toString());
                 this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
+                return newN;
             }
         }
     };

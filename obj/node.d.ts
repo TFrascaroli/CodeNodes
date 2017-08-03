@@ -28,7 +28,7 @@ export declare class Node {
     private collectionValueOf(v);
     dropPreBuilt(): void;
     render(parent: SVGElement): void;
-    cloneLastValue(): void;
+    cloneLastValue(): NodeValue;
     move(x: any, y: any): void;
     serialize(): INodeModel;
     findValue(id: number): NodeValue;

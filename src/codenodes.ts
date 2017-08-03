@@ -93,14 +93,14 @@ export class CodeNodes {
         };
     }
 
-    public addNode(name: string, type: string) {
+    public addNode(name: string, type: string, id?: number) {
         let t: ICodeNodesType = this.findType(type);
         if (t) {
             let ot: ICodeNodesType = this.findType(t.outputType);
             if (ot) {
                 let p = this.menuPoint || { x: 10, y: 10 };
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: t,
                     isCollection: false,
@@ -143,7 +143,7 @@ export class CodeNodes {
         //     return e.clone()
         // }); TODO: Arreglar això
     };
-    public addCollection(name, ofType: string) {
+    public addCollection(name, ofType: string, id?: number) {
         let t: ICodeNodesType = this.findType(ofType);
         if (t) {
             let ot: ICodeNodesType = this.findType(t.outputType);
@@ -152,7 +152,7 @@ export class CodeNodes {
                 let p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: this.collectionTypeOf(t),
                     isCollection: true,
@@ -182,11 +182,10 @@ export class CodeNodes {
         model.nodes.forEach(nm => {
             let n;
             if (!nm.arguments.isCollection) {
-                n = self.addNode(nm.arguments.title, nm.arguments.type);
+                n = self.addNode(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             } else {
-                n = self.addCollection(nm.arguments.title, nm.arguments.type);
+                n = self.addCollection(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             }
-            n.options.id = nm.arguments.id;
             n.move(nm.arguments.x, nm.arguments.y);
             n.setValues(nm.values);
         });

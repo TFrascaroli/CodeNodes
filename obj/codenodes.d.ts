@@ -18,10 +18,10 @@ export declare class CodeNodes {
     clear(): void;
     findType(tID: string): ICodeNodesType;
     private collectionTypeOf(t);
-    addNode(name: string, type: string): Node;
+    addNode(name: string, type: string, id?: number): Node;
     private collectionBuilder();
     private collectionClone(arr);
-    addCollection(name: any, ofType: string): Node;
+    addCollection(name: any, ofType: string, id?: number): Node;
     serialize(): ICodeNodesModel;
     parse(model: ICodeNodesModel): void;
     getOfType(type: string): Node[];

@@ -239,11 +239,12 @@ export class NodeCanvas {
                 n.outputConnectors.push(conn);
                 self.paths.appendChild(conn.path);
 
-
+                let val;
                 if (end2.options.isCollection) {
-                    end2.cloneLastValue();
+                    val = end2.cloneLastValue();
+                } else {
+                    val = end2.findValue(cn.valueTo);
                 }
-                let val = end2.findValue(cn.valueTo);
                 val.inputConnector = conn;
                 conn.end2 = val;
                 val.updateConectorPosition();

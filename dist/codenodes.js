@@ -1991,14 +1991,14 @@ var CodeNodes = (function () {
             ]
         };
     };
-    CodeNodes.prototype.addNode = function (name, type) {
+    CodeNodes.prototype.addNode = function (name, type, id) {
         var t = this.findType(type);
         if (t) {
             var ot = this.findType(t.outputType);
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: t,
                     isCollection: false,
@@ -2047,7 +2047,7 @@ var CodeNodes = (function () {
         // }); TODO: Arreglar això
     };
     ;
-    CodeNodes.prototype.addCollection = function (name, ofType) {
+    CodeNodes.prototype.addCollection = function (name, ofType, id) {
         var t = this.findType(ofType);
         if (t) {
             var ot = this.findType(t.outputType);
@@ -2055,7 +2055,7 @@ var CodeNodes = (function () {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: this.collectionTypeOf(t),
                     isCollection: true,
@@ -2086,12 +2086,11 @@ var CodeNodes = (function () {
         model.nodes.forEach(function (nm) {
             var n;
             if (!nm.arguments.isCollection) {
-                n = self.addNode(nm.arguments.title, nm.arguments.type);
+                n = self.addNode(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             }
             else {
-                n = self.addCollection(nm.arguments.title, nm.arguments.type);
+                n = self.addCollection(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             }
-            n.options.id = nm.arguments.id;
             n.move(nm.arguments.x, nm.arguments.y);
             n.setValues(nm.values);
         });
@@ -2389,6 +2388,7 @@ var Node = (function () {
                 this.output.setAttribute("cy", (this.outputOffset.y).toString());
                 this.outputText.setAttribute("y", (this.outputOffset.y).toString());
                 this.rect.setAttribute("height", ((this.nRows * ROW_HEIGHT) + 2).toString());
+                return newN;
             }
         }
     };
@@ -2723,10 +2723,13 @@ var NodeCanvas = (function () {
                 var conn = new nodeconnector_1.NodeConnector(p1, n);
                 n.outputConnectors.push(conn);
                 self.paths.appendChild(conn.path);
+                var val;
                 if (end2.options.isCollection) {
-                    end2.cloneLastValue();
+                    val = end2.cloneLastValue();
                 }
-                var val = end2.findValue(cn.valueTo);
+                else {
+                    val = end2.findValue(cn.valueTo);
+                }
                 val.inputConnector = conn;
                 conn.end2 = val;
                 val.updateConectorPosition();

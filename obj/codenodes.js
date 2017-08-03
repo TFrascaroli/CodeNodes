@@ -76,14 +76,14 @@ var CodeNodes = (function () {
             ]
         };
     };
-    CodeNodes.prototype.addNode = function (name, type) {
+    CodeNodes.prototype.addNode = function (name, type, id) {
         var t = this.findType(type);
         if (t) {
             var ot = this.findType(t.outputType);
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: t,
                     isCollection: false,
@@ -132,7 +132,7 @@ var CodeNodes = (function () {
         // }); TODO: Arreglar això
     };
     ;
-    CodeNodes.prototype.addCollection = function (name, ofType) {
+    CodeNodes.prototype.addCollection = function (name, ofType, id) {
         var t = this.findType(ofType);
         if (t) {
             var ot = this.findType(t.outputType);
@@ -140,7 +140,7 @@ var CodeNodes = (function () {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
                 return this.canvas.addNode({
-                    id: this.nodesCount++,
+                    id: typeof id !== "undefined" ? id : this.nodesCount++,
                     title: name,
                     type: this.collectionTypeOf(t),
                     isCollection: true,
@@ -171,12 +171,11 @@ var CodeNodes = (function () {
         model.nodes.forEach(function (nm) {
             var n;
             if (!nm.arguments.isCollection) {
-                n = self.addNode(nm.arguments.title, nm.arguments.type);
+                n = self.addNode(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             }
             else {
-                n = self.addCollection(nm.arguments.title, nm.arguments.type);
+                n = self.addCollection(nm.arguments.title, nm.arguments.type, nm.arguments.id);
             }
-            n.options.id = nm.arguments.id;
             n.move(nm.arguments.x, nm.arguments.y);
             n.setValues(nm.values);
         });
