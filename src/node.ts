@@ -85,7 +85,7 @@ export class Node {
             this.g.setAttribute("class", "entity");
 
             this.outputOffset = {
-                x: 130,
+                x: 150,
                 y: (this.nRows * ROW_HEIGHT) - 10
             };
 

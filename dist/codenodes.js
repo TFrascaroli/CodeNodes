@@ -2294,7 +2294,7 @@ var Node = (function () {
             this.g.setAttribute("transform", "translate(" + this.position.x + "," + this.position.y + ")");
             this.g.setAttribute("class", "entity");
             this.outputOffset = {
-                x: 130,
+                x: 150,
                 y: (this.nRows * ROW_HEIGHT) - 10
             };
             this.rect = document.createElementNS(namespace, "rect");

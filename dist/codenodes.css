@@ -69,16 +69,16 @@
   pointer-events: none;
 }
 .codenodes .row foreignObject {
-  width: 108px;
+  width: 128px;
   height: 25px;
 }
 .codenodes .row foreignObject div {
   width: 100%;
   height: 100%;
 }
-.codenodes .row foreignObject div input {
+.codenodes .row foreignObject div input:not([type="color"]) {
   width: 94%;
-  height: 100%;
+  height: 85%;
   margin: 0 3%;
 }
 .codenodes .entity .row.title {
@@ -214,6 +214,30 @@
 }
 .codenodes input[type=range]:focus::-ms-fill-upper {
   background: #a1a1a1;
+}
+.codenodes select {
+  padding: 0;
+  border: 0;
+  color: #dedede;
+  background: transparent;
+  margin: 4px 0 0 15px;
+}
+.codenodes select option {
+  color: black;
+}
+.codenodes input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 25px;
+  height: 15px;
+  margin: 4px 0 0 15px;
+  padding: 0;
+}
+.codenodes input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.codenodes input[type="color"]::-webkit-color-swatch {
+  border: none;
 }
 .codenodes-popup {
   display: none;
