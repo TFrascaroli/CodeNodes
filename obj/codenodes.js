@@ -82,7 +82,7 @@ var CodeNodes = (function () {
             var ot = this.findType(t.outputType);
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
-                this.canvas.addNode({
+                return this.canvas.addNode({
                     id: this.nodesCount++,
                     title: name,
                     type: t,
@@ -139,7 +139,7 @@ var CodeNodes = (function () {
             if (ot) {
                 var p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
-                this.canvas.addNode({
+                return this.canvas.addNode({
                     id: this.nodesCount++,
                     title: name,
                     type: this.collectionTypeOf(t),
@@ -167,7 +167,20 @@ var CodeNodes = (function () {
     CodeNodes.prototype.parse = function (model) {
         var self = this;
         this.canvas.setTransform(model.transform);
-        self.canvas.parse(model.nodes, this.types);
+        self.canvas.clear();
+        model.nodes.forEach(function (nm) {
+            var n;
+            if (!nm.arguments.isCollection) {
+                n = self.addNode(nm.arguments.title, nm.arguments.type);
+            }
+            else {
+                n = self.addCollection(nm.arguments.title, nm.arguments.type);
+            }
+            n.options.id = nm.arguments.id;
+            n.move(nm.arguments.x, nm.arguments.y);
+            n.setValues(nm.values);
+        });
+        self.canvas.parseConnectors(model.nodes);
     };
     CodeNodes.prototype.getOfType = function (type) {
         return this.canvas.getOfType(type);

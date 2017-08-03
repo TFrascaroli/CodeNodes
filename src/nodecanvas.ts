@@ -225,41 +225,8 @@ export class NodeCanvas {
         });
     }
 
-    findNode (id: number): Node {
-        let i, len = this.nodes.length;
-        for (i = 0; i < len; i += 1) {
-            if (this.nodes[i].options.id === id) return this.nodes[i];
-        }
-        return null;
-    }
-
-    findType (id: string, types: ICodeNodesType[]): ICodeNodesType {
-        let i = 0, len = types.length;
-        for (;i < len; i++) {
-            if (types[i].id === id) return types[i];
-        }
-        return null;
-    }
-
-    parse (nodes: INodeModel[], types: ICodeNodesType[]) {
+    parseConnectors (nodes: Array<INodeModel>) {
         let self = this;
-        this.clear();
-        nodes.forEach(nm => {
-            let t = this.findType(nm.arguments.type, types);
-            if (t) {
-                let args: INodeArguments = {
-                    id: nm.arguments.id,
-                    title: nm.arguments.title,
-                    type: t,
-                    isCollection: nm.arguments.isCollection,
-                    x: nm.arguments.x,
-                    y: nm.arguments.y
-                };
-                let n = self.addNode(args);
-                n.setValues(nm.values);
-            }
-        });
-
         nodes.forEach(nm => {
             let n = self.findNode(nm.arguments.id);
             nm.outputConnectors.forEach(cn => {
@@ -282,6 +249,22 @@ export class NodeCanvas {
                 val.updateConectorPosition();
             });
         });
+    }
+
+    findNode (id: number): Node {
+        let i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id) return this.nodes[i];
+        }
+        return null;
+    }
+
+    findType (id: string, types: ICodeNodesType[]): ICodeNodesType {
+        let i = 0, len = types.length;
+        for (;i < len; i++) {
+            if (types[i].id === id) return types[i];
+        }
+        return null;
     }
 
     clear() {

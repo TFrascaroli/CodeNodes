@@ -1,24 +1,24 @@
-import {NodeCanvas} from "./nodecanvas";
-import {Node} from "./node";
-import {CodeNodesMenu} from "./menu";
-import {Point} from "./point";
-import {ICodeNodesType} from "./interfaces/ICodeNodesType";
-import {ICodeNodesValueSchema} from "./interfaces/ICodeNodesValueSchema";
-import {INodeArguments} from "./interfaces/INodeArguments";
-import {INodeModel} from "./interfaces/INodeModel";
-import {ICodeNodesModel} from "./interfaces/ICodeNodesModel";
+import { NodeCanvas } from "./nodecanvas";
+import { Node } from "./node";
+import { CodeNodesMenu } from "./menu";
+import { Point } from "./point";
+import { ICodeNodesType } from "./interfaces/ICodeNodesType";
+import { ICodeNodesValueSchema } from "./interfaces/ICodeNodesValueSchema";
+import { INodeArguments } from "./interfaces/INodeArguments";
+import { INodeModel } from "./interfaces/INodeModel";
+import { ICodeNodesModel } from "./interfaces/ICodeNodesModel";
 
 export class CodeNodes {
-    
+
     public canvas: NodeCanvas;
-    public types:ICodeNodesType[];
+    public types: ICodeNodesType[];
     public menu: CodeNodesMenu;
     private menuPoint: Point;
     private nodesCount: number = 0;
     public onclear: Function;
 
 
-    constructor (types: ICodeNodesType[]) {
+    constructor(types: ICodeNodesType[]) {
         let self = this;
         this.canvas = new NodeCanvas();
         this.setTypes(types);
@@ -32,7 +32,7 @@ export class CodeNodes {
         }
     };
 
-    setTypes (types: ICodeNodesType[]) {
+    setTypes(types: ICodeNodesType[]) {
         this.clear();
         this.types = types.map(t => {
             t.outputType = t.outputType || t.id;
@@ -42,36 +42,36 @@ export class CodeNodes {
         }).reverse();
     }
 
-    getSVG () {
+    getSVG() {
         this.canvas.render();
         return this.canvas.svg;
     };
 
-    init () {
+    init() {
         this.canvas.init();
         this.canvas.svg.appendChild(this.menu.g);
     };
 
-    center () {
+    center() {
         this.canvas.center();
     };
 
-    clear () {
+    clear() {
         this.canvas.clear();
         if (this.onclear instanceof Function) {
             this.onclear();
         }
     }
 
-    findType (tID: string): ICodeNodesType {
+    findType(tID: string): ICodeNodesType {
         let i = 0, len = this.types.length;
-        for(;i < len; i++) {
+        for (; i < len; i++) {
             if (this.types[i].id === tID) return this.types[i];
         }
         return null;
     }
 
-    private collectionTypeOf (t: ICodeNodesType): ICodeNodesType{
+    private collectionTypeOf(t: ICodeNodesType): ICodeNodesType {
         return {
             id: t.id,
             name: t.name,
@@ -93,13 +93,13 @@ export class CodeNodes {
         };
     }
 
-    public addNode (name: string, type: string) {
+    public addNode(name: string, type: string) {
         let t: ICodeNodesType = this.findType(type);
         if (t) {
             let ot: ICodeNodesType = this.findType(t.outputType);
             if (ot) {
-                let p = this.menuPoint || {x: 10, y: 10};
-                this.canvas.addNode({
+                let p = this.menuPoint || { x: 10, y: 10 };
+                return this.canvas.addNode({
                     id: this.nodesCount++,
                     title: name,
                     type: t,
@@ -114,9 +114,9 @@ export class CodeNodes {
             console.log("There is no type " + type + " registered");
         }
     };
-    private collectionBuilder () {
-        function flatten (arrs) {
-	        var ret = [];
+    private collectionBuilder() {
+        function flatten(arrs) {
+            var ret = [];
             if (typeof arrs !== "undefined" && arrs.length) {
                 arrs.forEach(e => {
                     flatten(e).forEach(en => {
@@ -126,7 +126,7 @@ export class CodeNodes {
             } else {
                 ret.push(arrs);
             }
-	        return ret;
+            return ret;
         }
         // function flatten(arr) {
         //     return arr.reduce(function (flat, toFlatten) {
@@ -137,21 +137,21 @@ export class CodeNodes {
             return typeof v !== "undefined";
         });
     };
-    private collectionClone (arr) {
+    private collectionClone(arr) {
         return arr;
         // return arr.map(function (e) {
         //     return e.clone()
         // }); TODO: Arreglar això
     };
-    public addCollection (name, ofType: string) {
+    public addCollection(name, ofType: string) {
         let t: ICodeNodesType = this.findType(ofType);
         if (t) {
             let ot: ICodeNodesType = this.findType(t.outputType);
             if (ot) {
 
-                let p = this.menuPoint || {x: 10, y: 10};
+                let p = this.menuPoint || { x: 10, y: 10 };
                 //name, this.collectionBuilder, collectionSchema, ofType, ot.clonable || false, this.collectionClone, true, outputType, p.x, p.y
-                this.canvas.addNode({
+                return this.canvas.addNode({
                     id: this.nodesCount++,
                     title: name,
                     type: this.collectionTypeOf(t),
@@ -167,17 +167,31 @@ export class CodeNodes {
         }
     };
 
-    serialize (): ICodeNodesModel {
+    serialize(): ICodeNodesModel {
         return {
             nodes: this.canvas.serialize(),
             transform: this.canvas.getTransform()
         };
     };
 
-    parse (model: ICodeNodesModel) {
+    parse(model: ICodeNodesModel) {
         let self = this;
         this.canvas.setTransform(model.transform);
-        self.canvas.parse(model.nodes, this.types);
+
+        self.canvas.clear();
+        model.nodes.forEach(nm => {
+            let n;
+            if (!nm.arguments.isCollection) {
+                n = self.addNode(nm.arguments.title, nm.arguments.type);
+            } else {
+                n = self.addCollection(nm.arguments.title, nm.arguments.type);
+            }
+            n.options.id = nm.arguments.id;
+            n.move(nm.arguments.x, nm.arguments.y);
+            n.setValues(nm.values);
+        });
+
+        self.canvas.parseConnectors(model.nodes);
     }
 
     getOfType(type: string): Node[] {

@@ -200,41 +200,8 @@ var NodeCanvas = (function () {
             return n.serialize();
         });
     };
-    NodeCanvas.prototype.findNode = function (id) {
-        var i, len = this.nodes.length;
-        for (i = 0; i < len; i += 1) {
-            if (this.nodes[i].options.id === id)
-                return this.nodes[i];
-        }
-        return null;
-    };
-    NodeCanvas.prototype.findType = function (id, types) {
-        var i = 0, len = types.length;
-        for (; i < len; i++) {
-            if (types[i].id === id)
-                return types[i];
-        }
-        return null;
-    };
-    NodeCanvas.prototype.parse = function (nodes, types) {
-        var _this = this;
+    NodeCanvas.prototype.parseConnectors = function (nodes) {
         var self = this;
-        this.clear();
-        nodes.forEach(function (nm) {
-            var t = _this.findType(nm.arguments.type, types);
-            if (t) {
-                var args = {
-                    id: nm.arguments.id,
-                    title: nm.arguments.title,
-                    type: t,
-                    isCollection: nm.arguments.isCollection,
-                    x: nm.arguments.x,
-                    y: nm.arguments.y
-                };
-                var n = self.addNode(args);
-                n.setValues(nm.values);
-            }
-        });
         nodes.forEach(function (nm) {
             var n = self.findNode(nm.arguments.id);
             nm.outputConnectors.forEach(function (cn) {
@@ -255,6 +222,22 @@ var NodeCanvas = (function () {
                 val.updateConectorPosition();
             });
         });
+    };
+    NodeCanvas.prototype.findNode = function (id) {
+        var i, len = this.nodes.length;
+        for (i = 0; i < len; i += 1) {
+            if (this.nodes[i].options.id === id)
+                return this.nodes[i];
+        }
+        return null;
+    };
+    NodeCanvas.prototype.findType = function (id, types) {
+        var i = 0, len = types.length;
+        for (; i < len; i++) {
+            if (types[i].id === id)
+                return types[i];
+        }
+        return null;
     };
     NodeCanvas.prototype.clear = function () {
         [].concat(this.nodes).forEach(function (node) {

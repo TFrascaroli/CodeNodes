@@ -42,9 +42,9 @@ export declare class NodeCanvas {
     addNode(opts: INodeArguments): Node;
     init(): void;
     serialize(): INodeModel[];
+    parseConnectors(nodes: Array<INodeModel>): void;
     findNode(id: number): Node;
     findType(id: string, types: ICodeNodesType[]): ICodeNodesType;
-    parse(nodes: INodeModel[], types: ICodeNodesType[]): void;
     clear(): void;
     getTerminalNodes(): Node[];
     getOfType(type: string): Node[];
